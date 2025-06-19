@@ -2,8 +2,8 @@ package com.example.recipttracker.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.*
-import com.example.recipttracker.ui.screen.LandingScreen
-import com.example.recipttracker.ui.screen.ReceiptListScreen
+import com.example.recipttracker.ui.launch.LandingScreen
+import com.example.recipttracker.ui.receiptslist.ReceiptListScreen
 
 @Composable
 fun AppNavigator() {
@@ -16,7 +16,7 @@ fun AppNavigator() {
             })
         }
         composable("receipts") {
-            ReceiptListScreen()
+            ReceiptListScreen(navController)
         }
     }
 }

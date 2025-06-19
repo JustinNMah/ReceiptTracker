@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dagger.hilt)
+    alias(libs.plugins.ksp)
+    kotlin("kapt")
 }
 
 android {
@@ -40,6 +43,10 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -51,15 +58,28 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+    // Dagger-Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Retrofit - add dependencies for this when we store database in cloud
 }

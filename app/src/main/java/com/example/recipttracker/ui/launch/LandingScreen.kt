@@ -1,4 +1,4 @@
-package com.example.recipttracker.ui.screen
+package com.example.recipttracker.ui.launch
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
