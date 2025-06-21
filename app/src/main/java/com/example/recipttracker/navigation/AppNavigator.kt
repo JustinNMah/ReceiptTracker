@@ -29,7 +29,7 @@ fun AppNavigator() {
             )
         }
         composable("receipts") {
-            ReceiptListScreen(navController)
+            ReceiptListScreen()
         }
     }
 }
