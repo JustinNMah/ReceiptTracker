@@ -1,4 +1,4 @@
-package com.example.recipttracker.ui.launch
+package com.example.recipttracker.ui.login
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -14,8 +14,15 @@ import androidx.compose.ui.res.painterResource
 import com.example.recipttracker.R
 import androidx.compose.ui.text.style.TextAlign
 
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.*
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+
 @Composable
-fun LandingScreen(onLogin: () -> Unit, onSignUp: () -> Unit) {
+fun LoginScreen(onEnter: () -> Unit) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -24,6 +31,7 @@ fun LandingScreen(onLogin: () -> Unit, onSignUp: () -> Unit) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Spacer(modifier = Modifier.height(50.dp))
 
         Image(
@@ -35,7 +43,7 @@ fun LandingScreen(onLogin: () -> Unit, onSignUp: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Welcome to ReceiptTracker",
+            text = "Welcome Back",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth(),
@@ -44,8 +52,30 @@ fun LandingScreen(onLogin: () -> Unit, onSignUp: () -> Unit) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Enter Email") },
+            singleLine = true,
+            modifier = Modifier.width(240.dp),
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Enter Password") },
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.width(240.dp),
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
         Button(
-            onClick = onLogin,
+            onClick = onEnter,
             modifier = Modifier.width(185.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -53,24 +83,15 @@ fun LandingScreen(onLogin: () -> Unit, onSignUp: () -> Unit) {
         ) {
             Text("Login")
         }
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = onSignUp,
-            modifier = Modifier.width(185.dp)
-        ) {
-            Text("Sign Up")
-        }
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
-fun LandingScreenPreview() {
+fun LoginScreenPreview() {
     ReceiptTrackerTheme {
-        LandingScreen(onLogin = {}, onSignUp = {})
+        LoginScreen(onEnter = {})
     }
 }
 

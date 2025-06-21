@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.recipttracker.navigation.AppNavigator
-import com.example.recipttracker.ui.theme.ReciptTrackerTheme
+import com.example.recipttracker.ui.theme.ReceiptTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ReciptTrackerTheme {
+            ReceiptTrackerTheme {
                 AppNavigator()
             }
         }

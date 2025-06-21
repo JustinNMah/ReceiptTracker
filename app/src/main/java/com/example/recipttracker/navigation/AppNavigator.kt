@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.*
 import com.example.recipttracker.ui.launch.LandingScreen
 import com.example.recipttracker.ui.receiptslist.ReceiptListScreen
+import com.example.recipttracker.ui.login.LoginScreen
+import com.example.recipttracker.ui.signup.SignUpScreen
 
 @Composable
 fun AppNavigator() {
@@ -11,9 +13,20 @@ fun AppNavigator() {
 
     NavHost(navController = navController, startDestination = "landing") {
         composable("landing") {
-            LandingScreen(onContinue = {
-                navController.navigate("receipts")
-            })
+            LandingScreen(
+                onLogin = { navController.navigate("login") },
+                onSignUp = { navController.navigate("signup") }
+            )
+        }
+        composable("login"){
+            LoginScreen(
+                onEnter = { navController.navigate("receipts") }
+            )
+        }
+        composable("signup"){
+            SignUpScreen(
+                onEnter = { navController.navigate("receipts") }
+            )
         }
         composable("receipts") {
             ReceiptListScreen(navController)
