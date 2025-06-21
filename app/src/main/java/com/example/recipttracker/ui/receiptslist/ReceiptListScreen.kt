@@ -22,18 +22,18 @@ import com.example.recipttracker.ui.theme.ReceiptTrackerTheme
 import java.text.SimpleDateFormat
 import java.util.*
 
-enum class SortOption(val label: String) {
+enum class ReceiptSortOption(val label: String) {
     DATE("Date"),
     ALPHABETICAL("A–Z"),
     CATEGORY("Category")
 }
 
 data class SortState(
-    val option: SortOption,
+    val option: ReceiptSortOption,
     val isAscending: Boolean = true
 )
 
-data class Receipt(
+data class ReceiptItem(
     val store: String,
     val date: String,
     val amount: String,
@@ -69,22 +69,22 @@ data class Receipt(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReceiptListScreen() {
-    var sortState by remember { mutableStateOf(SortState(SortOption.DATE)) }
+    var sortState by remember { mutableStateOf(SortState(ReceiptSortOption.DATE)) }
     var showFabMenu by remember { mutableStateOf(false) }
 
     val receipts = sampleReceipts.sortedWith(
         when (sortState.option) {
-            SortOption.DATE -> if (sortState.isAscending) {
+            ReceiptSortOption.DATE -> if (sortState.isAscending) {
                 compareBy { it.parsedDate }
             } else {
                 compareByDescending { it.parsedDate }
             }
-            SortOption.ALPHABETICAL -> if (sortState.isAscending) {
+            ReceiptSortOption.ALPHABETICAL -> if (sortState.isAscending) {
                 compareBy { it.store }
             } else {
                 compareByDescending { it.store }
             }
-            SortOption.CATEGORY -> if (sortState.isAscending) {
+            ReceiptSortOption.CATEGORY -> if (sortState.isAscending) {
                 compareBy { it.category }
             } else {
                 compareByDescending { it.category }
@@ -159,7 +159,7 @@ fun ReceiptListScreen() {
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                SortOption.entries.forEachIndexed { index, option ->
+                ReceiptSortOption.entries.forEachIndexed { index, option ->
                     SegmentedButton(
                         selected = sortState.option == option,
                         onClick = {
@@ -171,7 +171,7 @@ fun ReceiptListScreen() {
                         },
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index,
-                            count = SortOption.entries.size
+                            count = ReceiptSortOption.entries.size
                         )
                     ) {
                         Row(
@@ -197,7 +197,7 @@ fun ReceiptListScreen() {
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 when (sortState.option) {
-                    SortOption.DATE -> {
+                    ReceiptSortOption.DATE -> {
                         // date -> group by month
                         val grouped = receipts.groupBy { it.monthYear }
                         grouped.forEach { (month, items) ->
@@ -223,7 +223,7 @@ fun ReceiptListScreen() {
                             }
                         }
                     }
-                    SortOption.CATEGORY -> {
+                    ReceiptSortOption.CATEGORY -> {
                         // group by category
                         val grouped = receipts.groupBy { it.category }
                         grouped.forEach { (category, items) ->
@@ -262,7 +262,7 @@ fun ReceiptListScreen() {
 }
 
 @Composable
-fun ReceiptListItem(receipt: Receipt) {
+fun ReceiptListItem(receipt: ReceiptItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -290,10 +290,10 @@ fun ReceiptListItem(receipt: Receipt) {
 }
 
 val sampleReceipts = listOf(
-    Receipt("Walmart", "2025-06-19", "$120.00", "Groceries"),
-    Receipt("NoFrills", "2025-06-10", "$42.10", "Groceries"),
-    Receipt("Bob's", "2025-06-05", "$34.99", "Groceries"),
-    Receipt("Apple Store", "2025-05-25", "$999.00", "Electronics")
+    ReceiptItem("Walmart", "2025-06-19", "$120.00", "Groceries"),
+    ReceiptItem("NoFrills", "2025-06-10", "$42.10", "Groceries"),
+    ReceiptItem("Bob's", "2025-06-05", "$34.99", "Groceries"),
+    ReceiptItem("Apple Store", "2025-05-25", "$999.00", "Electronics")
 )
 
 @Preview(showBackground = true)
