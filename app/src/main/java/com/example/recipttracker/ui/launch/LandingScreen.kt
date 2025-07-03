@@ -2,7 +2,6 @@ package com.example.recipttracker.ui.launch
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -10,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.recipttracker.ui.theme.ReceiptTrackerTheme
 import androidx.compose.foundation.Image
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import com.example.recipttracker.R
 import androidx.compose.ui.text.style.TextAlign

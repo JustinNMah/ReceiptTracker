@@ -1,5 +1,6 @@
 package com.example.recipttracker.domain.model
 
+import android.graphics.Bitmap
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,5 +10,6 @@ data class Receipt(
     val store: String,
     val amount: Float,
     val date: String, // TODO: might need to change this type
-    val category: String
+    val category: String,
+    val photoFile: String
 )
