@@ -82,4 +82,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     // Retrofit - add dependencies for this when we store database in cloud
+
+    // Google MLKit Dependencies
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 }

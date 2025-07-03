@@ -2,6 +2,7 @@ package com.example.recipttracker.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.*
+import com.example.recipttracker.ui.capture.CaptureScreen
 import com.example.recipttracker.ui.launch.LandingScreen
 import com.example.recipttracker.ui.receiptslist.ReceiptListScreen
 import com.example.recipttracker.ui.login.LoginScreen
@@ -29,7 +30,12 @@ fun AppNavigator() {
             )
         }
         composable("receipts") {
-            ReceiptListScreen()
+            ReceiptListScreen(
+                onCapture = { navController.navigate("capture")}
+            )
+        }
+        composable("capture") {
+            CaptureScreen()
         }
     }
 }
