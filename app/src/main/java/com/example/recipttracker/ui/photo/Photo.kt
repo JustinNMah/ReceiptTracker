@@ -4,13 +4,18 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import java.io.File
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -31,6 +36,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +53,7 @@ fun Photo(filePath: String, onFinish: () -> Unit) {
     val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
 
     var date by remember { mutableStateOf("") }
+    var total by remember { mutableStateOf("") }
     var store by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
 
@@ -63,15 +72,6 @@ fun Photo(filePath: String, onFinish: () -> Unit) {
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            Box {
-                FloatingActionButton(
-                    onClick = { onFinish() }
-                ) {
-                    Icon(Icons.Default.Close, contentDescription = "Cancel")
-                }
-            }
         }
     ) { innerPadding ->
         Column(
@@ -88,15 +88,28 @@ fun Photo(filePath: String, onFinish: () -> Unit) {
                     .size(200.dp)
             )
             OutlinedTextField(
-                value = date,
-                onValueChange = { date = it },
-                label = { Text("Date") },
-                modifier = Modifier.padding(8.dp)
-            )
-            OutlinedTextField(
                 value = store,
                 onValueChange = { store = it },
                 label = { Text("Store") },
+                modifier = Modifier.padding(8.dp)
+            )
+            OutlinedTextField(
+                value = total,
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() }) {
+                        total = input
+                    }
+                },
+                label = { Text("Total") },
+                modifier = Modifier.padding(8.dp),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                trailingIcon = { Text("$") }
+            )
+            OutlinedTextField(
+                value = date,
+                onValueChange = { date = it },
+                label = { Text("Date") },
                 modifier = Modifier.padding(8.dp)
             )
             OutlinedTextField(
@@ -105,14 +118,26 @@ fun Photo(filePath: String, onFinish: () -> Unit) {
                 label = { Text("Category") },
                 modifier = Modifier.padding(8.dp)
             )
-            Button(
-                onClick = {
-                    Log.d("Submit", "Date: $date, Store: $store, Category: $category")
-                    onFinish()
-                },
-                modifier = Modifier.padding(16.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, end = 60.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Submit")
+                FloatingActionButton(
+                    onClick = { onFinish() },
+                    modifier = Modifier.padding(10.dp).size(40.dp),
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Cancel")
+                }
+                FloatingActionButton(
+                    onClick = { onFinish() },
+                    modifier = Modifier.padding(10.dp).size(40.dp),
+                    containerColor = Color.LightGray
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = "Cancel")
+                }
             }
         }
     }
