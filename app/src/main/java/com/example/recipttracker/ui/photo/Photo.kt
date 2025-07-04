@@ -1,39 +1,119 @@
 package com.example.recipttracker.ui.photo
-
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.runtime.Composable
 import java.io.File
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Photo(filePath: String, onFinish: () -> Unit) {
     val imgFile = File(filePath)
 
-    if (imgFile.exists()) {
-        val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
+    if (!imgFile.exists()) {
+        onFinish()
+        return
+    }
+
+    val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
+
+    var date by remember { mutableStateOf("") }
+    var store by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("ReceiptTracker", textAlign = TextAlign.Center) },
+                navigationIcon = {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Search, contentDescription = "Search")
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            Box {
+                FloatingActionButton(
+                    onClick = { onFinish() }
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Cancel")
+                }
+            }
+        }
+    ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
                 bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Receipt photo",
+                contentDescription = "Receipt Image",
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .size(200.dp)
             )
-            Text(
-                text = "Absolute file path: $filePath",
+            OutlinedTextField(
+                value = date,
+                onValueChange = { date = it },
+                label = { Text("Date") },
+                modifier = Modifier.padding(8.dp)
+            )
+            OutlinedTextField(
+                value = store,
+                onValueChange = { store = it },
+                label = { Text("Store") },
+                modifier = Modifier.padding(8.dp)
+            )
+            OutlinedTextField(
+                value = category,
+                onValueChange = { category = it },
+                label = { Text("Category") },
+                modifier = Modifier.padding(8.dp)
+            )
+            Button(
+                onClick = {
+                    Log.d("Submit", "Date: $date, Store: $store, Category: $category")
+                    onFinish()
+                },
                 modifier = Modifier.padding(16.dp)
-            )
+            ) {
+                Text("Submit")
+            }
         }
-    } else {
-        Log.d("TAG", "Image $filePath does not exist")
     }
 }
