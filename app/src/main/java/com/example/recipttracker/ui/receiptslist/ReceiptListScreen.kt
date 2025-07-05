@@ -68,7 +68,10 @@ data class ReceiptItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReceiptListScreen() {
+fun ReceiptListScreen(
+    onCapture: () -> Unit,
+    onUpload: () -> Unit
+) {
     var sortState by remember { mutableStateOf(SortState(ReceiptSortOption.DATE)) }
     var showFabMenu by remember { mutableStateOf(false) }
 
@@ -136,6 +139,7 @@ fun ReceiptListScreen() {
                         onClick = {
                             showFabMenu = false
                             // handle capture click
+                            onCapture()
                         }
                     )
                     DropdownMenuItem(
@@ -143,6 +147,7 @@ fun ReceiptListScreen() {
                         onClick = {
                             showFabMenu = false
                             // handle upload click
+                            onUpload()
                         }
                     )
                 }
@@ -300,6 +305,9 @@ val sampleReceipts = listOf(
 @Composable
 fun ReceiptListScreenPreview() {
     ReceiptTrackerTheme {
-        ReceiptListScreen()
+        ReceiptListScreen(
+            onCapture = {},
+            onUpload = {}
+        )
     }
 }

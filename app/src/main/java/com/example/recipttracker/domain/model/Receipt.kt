@@ -1,5 +1,6 @@
 package com.example.recipttracker.domain.model
 
+import android.graphics.Bitmap
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.text.SimpleDateFormat
