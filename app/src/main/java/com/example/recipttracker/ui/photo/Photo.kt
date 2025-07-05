@@ -1,25 +1,25 @@
 package com.example.recipttracker.ui.photo
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.runtime.Composable
 import java.io.File
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -37,20 +37,34 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Photo(filePath: String, onFinish: () -> Unit) {
-    val imgFile = File(filePath)
+fun Photo(filePath: String, onFinish: () -> Unit, isUri: Boolean) {
+    var bitmap: Bitmap? = null
 
-    if (!imgFile.exists()) {
-        onFinish()
-        return
+    Log.d("TAG", "File/uri path received in Photo.kt -> $filePath")
+
+    if (isUri) {
+        val myUri = Uri.parse(filePath)
+        val inputStream = LocalContext.current.contentResolver.openInputStream(myUri)
+        bitmap = BitmapFactory.decodeStream(inputStream)
+    } else {
+        val imgFile = File(filePath)
+
+        if (!imgFile.exists()) {
+            Log.d("TAG", "Image file $imgFile cannot be resolved in Photo.kt")
+            onFinish()
+        }
+        bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
     }
 
-    val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
+    if (bitmap == null) {
+        Log.d("TAG", "Unable to convert $filePath into bitmap in Photo.kt")
+        onFinish()
+    }
 
     var date by remember { mutableStateOf("") }
     var total by remember { mutableStateOf("") }
@@ -80,13 +94,15 @@ fun Photo(filePath: String, onFinish: () -> Unit) {
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Receipt Image",
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .size(200.dp)
-            )
+            bitmap?.let {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "Receipt Image",
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .size(200.dp)
+                )
+            }
             OutlinedTextField(
                 value = store,
                 onValueChange = { store = it },

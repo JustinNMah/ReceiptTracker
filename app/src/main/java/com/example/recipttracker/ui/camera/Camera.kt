@@ -33,13 +33,17 @@ fun Camera(onFinish: (String) -> Unit) {
     val takePictureLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
-        bitmap?.let { onImageCaptured(it) }
+        if (bitmap != null) {
+            onImageCaptured(bitmap)
+        }
     }
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) takePictureLauncher.launch(null)
+        if (granted) {
+            takePictureLauncher.launch(null)
+        }
     }
 
     if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
