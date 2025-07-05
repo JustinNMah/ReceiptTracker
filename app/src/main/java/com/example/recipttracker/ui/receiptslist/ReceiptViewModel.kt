@@ -4,9 +4,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.state.ReceiptsListState
 import com.example.recipttracker.domain.repository.ReceiptRepository
 import com.example.recipttracker.domain.util.ReceiptSortOrder
+import com.example.recipttracker.domain.util.SortField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
@@ -25,22 +27,20 @@ class ReceiptViewModel @Inject constructor(
     private var getReceiptsCoroutine: Job? = null
 
     init {
-        getReceipts(ReceiptSortOrder.DateDesc)
+        getReceipts(_state.value.receiptSortOrder)
     }
 
     fun onEvent(event: ReceiptsEvent) { // create an event when user changes Sort Order or Deletes Receipt.
         when(event) {
             is ReceiptsEvent.Order -> {
-                // don't do anything if user clicked on the current sort order
-                if (state.value.receiptSortOrder == event.receiptSortOrder) {
-                    return
-                }
-                getReceipts(event.receiptSortOrder)
+                val allReceipts = _state.value.receipts.values.flatten()
+                sortReceipts(allReceipts, event.receiptSortOrder)
             }
             is ReceiptsEvent.DeleteReceipt -> {
                 viewModelScope.launch {
                     repository.deleteReceipt(event.receipt)
                 }
+                // TODO: add refreshing view
             }
         }
     }
@@ -49,20 +49,41 @@ class ReceiptViewModel @Inject constructor(
         getReceiptsCoroutine?.cancel()
         println("In getReceipts")
 
-        getReceiptsCoroutine = when(receiptSortOrder) {
-            is ReceiptSortOrder.DateDesc -> repository.getReceiptsByDateDesc()
-            is ReceiptSortOrder.DateAsc -> repository.getReceiptsByDateAsc()
-            is ReceiptSortOrder.StoreDesc -> repository.getReceiptsByStoreDesc()
-            is ReceiptSortOrder.StoreAsc -> repository.getReceiptsByStoreAsc()
-            is ReceiptSortOrder.CategoryDesc -> repository.getReceiptsByCategoryDesc()
-            is ReceiptSortOrder.CategoryAsc -> repository.getReceiptsByCategoryAsc()
-        }
+        getReceiptsCoroutine = repository.getReceipts()
             .onEach { receipts ->
-                _state.value = state.value.copy(
-                    receipts = receipts,
-                    receiptSortOrder = receiptSortOrder
-                )
+                sortReceipts(receipts, receiptSortOrder)
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun sortReceipts(allReceipts: List<Receipt>, receiptSortOrder: ReceiptSortOrder) {
+        val sortedReceipts = allReceipts.sortedWith(
+            when (receiptSortOrder.field) {
+                SortField.DATE -> if (receiptSortOrder.isAscending) {
+                    compareBy { it.parsedDate }
+                } else {
+                    compareByDescending { it.parsedDate }
+                }
+                SortField.STORE -> if (receiptSortOrder.isAscending) {
+                    compareBy { it.store }
+                } else {
+                    compareByDescending { it.store }
+                }
+                SortField.CATEGORY -> if (receiptSortOrder.isAscending) {
+                    compareBy { it.category }
+                } else {
+                    compareByDescending { it.category }
+                }
+            }
+        )
+        val groupedReceipts = when(receiptSortOrder.field) {
+            SortField.DATE -> sortedReceipts.groupBy { it.monthYear }
+            SortField.STORE -> mapOf("" to sortedReceipts)
+            SortField.CATEGORY -> sortedReceipts.groupBy { it.category }
+        }
+        _state.value = state.value.copy(
+            receipts = groupedReceipts,
+            receiptSortOrder = receiptSortOrder
+        )
     }
 }
