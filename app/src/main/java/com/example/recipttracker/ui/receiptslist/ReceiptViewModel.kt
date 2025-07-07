@@ -28,18 +28,6 @@ class ReceiptViewModel @Inject constructor(
 
     init {
         getReceipts(_state.value.receiptSortOrder)
-//        val receipt1 = Receipt(store="Walmart", date="2025-11-19", amount="$120.00", category="Groceries")
-//        val receipt2 = Receipt(store="NoFrills", date="2025-11-10", amount="$42.10", category="Groceries")
-//        val receipt3 = Receipt(store="Bob's", date="2025-11-17", amount="$39.99", category="Groceries")
-//        val receipt4 = Receipt(store="Apple Store", date="2025-02-25", amount="$999.00", category="Electronics")
-//        val receipt5 = Receipt(store="Another Store", date="2025-12-25", amount="$999.00", category="Electronics")
-//        viewModelScope.launch {
-//            repository.insertReceipt(receipt1)
-//            repository.insertReceipt(receipt2)
-//            repository.insertReceipt(receipt3)
-//            repository.insertReceipt(receipt4)
-//            repository.insertReceipt(receipt5)
-//        }
     }
 
     fun onEvent(event: ReceiptsEvent) { // create an event when user changes Sort Order or Deletes Receipt.
@@ -52,7 +40,6 @@ class ReceiptViewModel @Inject constructor(
                 viewModelScope.launch {
                     repository.deleteReceipt(event.receipt)
                 }
-                // TODO: add refreshing view
             }
         }
     }

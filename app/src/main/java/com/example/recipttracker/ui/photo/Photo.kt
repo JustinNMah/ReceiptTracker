@@ -2,7 +2,6 @@ package com.example.recipttracker.ui.photo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.runtime.Composable
 import java.io.File
@@ -39,10 +38,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.recipttracker.domain.model.Receipt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Photo(filePath: String, onFinish: () -> Unit, isUri: Boolean) {
+fun Photo(
+    filePath: String,
+    onFinish: () -> Unit, isUri: Boolean,
+    viewModel: PhotoViewModel = hiltViewModel()
+) {
     var bitmap: Bitmap? = null
 
     Log.d("TAG", "File/uri path received in Photo.kt -> $filePath")
@@ -148,7 +153,16 @@ fun Photo(filePath: String, onFinish: () -> Unit, isUri: Boolean) {
                     Icon(Icons.Default.Close, contentDescription = "Cancel")
                 }
                 FloatingActionButton(
-                    onClick = { onFinish() },
+                    onClick = {
+                        val newReceipt = Receipt(
+                            store = store,
+                            amount = "$$total",
+                            date = date,
+                            category = category
+                        )
+                        viewModel.onEvent(PhotoEvent.InsertReceipt(newReceipt))
+                        onFinish()
+                    },
                     modifier = Modifier.padding(10.dp).size(40.dp),
                     containerColor = Color.LightGray
                 ) {
