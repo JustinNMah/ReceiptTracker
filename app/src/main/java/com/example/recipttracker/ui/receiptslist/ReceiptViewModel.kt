@@ -41,6 +41,17 @@ class ReceiptViewModel @Inject constructor(
                     repository.deleteReceipt(event.receipt)
                 }
             }
+            is ReceiptsEvent.ModifyReceipt -> {
+                viewModelScope.launch {
+                    repository.modifyReceipt(
+                        event.id,
+                        event.store,
+                        event.amount,
+                        event.date,
+                        event.category
+                    )
+                }
+            }
         }
     }
 

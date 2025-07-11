@@ -24,4 +24,14 @@ class ReceiptRepositoryImpl(
     override suspend fun deleteReceipt(receipt: Receipt) {
         dao.deleteReceipt(receipt)
     }
+
+    override suspend fun modifyReceipt(
+        id: Int,
+        store: String,
+        amount: String,
+        date: String,
+        category: String
+    ) {
+        dao.modifyReceipt(id, store, amount, date, category)
+    }
 }

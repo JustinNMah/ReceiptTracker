@@ -25,6 +25,12 @@ interface ReceiptDao {
     fun getReceipts(): Flow<List<Receipt>>
 
     @Query("SELECT * FROM receipt WHERE id = :id")
-    fun getReceiptById(id: Int): Receipt?
+    suspend fun getReceiptById(id: Int): Receipt?
 
+    @Query(
+        "update receipt " +
+        "set store = :store, amount = :amount, date = :date, category = :category " +
+        "where id = :id"
+    )
+    suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String)
 }
