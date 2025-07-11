@@ -1,4 +1,4 @@
-package com.example.recipttracker.ui.addReceipt
+package com.example.recipttracker.ui.addEditReceipt
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -38,20 +38,19 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptsEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddReceipt(
+fun AddEditReceipt(
     onFinish: () -> Unit,
-    displayImageViewModel: DisplayImageViewModel,
+    receiptToEditOrAdd: ReceiptToEditOrAdd,
     receiptViewModel: ReceiptViewModel
 ) {
-    val uriPath = displayImageViewModel.uriPath.observeAsState()
-    Log.d("TAG", "uriPath change notified in AddReceipt.kt: $uriPath")
+    val uriPath = receiptToEditOrAdd.uriPath.observeAsState()
+    Log.d("TAG", "uriPath change notified in AddEditReceipt.kt: $uriPath")
     var bitmap: Bitmap? = null
 
     val imgUri = Uri.parse(uriPath.value)
@@ -63,10 +62,25 @@ fun AddReceipt(
         onFinish()
     }
 
-    var date by remember { mutableStateOf("") }
-    var total by remember { mutableStateOf("") }
-    var store by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
+    val receiptToEdit: Receipt? = receiptToEditOrAdd.receiptToEdit.getValue()
+    val isEdit: Boolean = receiptToEdit != null
+
+    lateinit var date: MutableState<String>
+    lateinit var amount: MutableState<String>
+    lateinit var store: MutableState<String>
+    lateinit var category: MutableState<String>
+
+    if (!isEdit) { // no receipt to edit. add instead
+        date = remember { mutableStateOf("") }
+        amount = remember { mutableStateOf("") }
+        store = remember { mutableStateOf("") }
+        category = remember { mutableStateOf("") }
+    } else { // edit receipt
+        date = remember { mutableStateOf(receiptToEdit!!.date) }
+        amount = remember { mutableStateOf(receiptToEdit!!.amount) }
+        store = remember { mutableStateOf(receiptToEdit!!.store) }
+        category = remember { mutableStateOf(receiptToEdit!!.category) }
+    }
 
     Scaffold(
         topBar = {
@@ -101,16 +115,16 @@ fun AddReceipt(
                 )
             }
             OutlinedTextField(
-                value = store,
-                onValueChange = { store = it },
+                value = store.value,
+                onValueChange = { store.value = it },
                 label = { Text("Store") },
                 modifier = Modifier.padding(8.dp)
             )
             OutlinedTextField(
-                value = total,
+                value = amount.value,
                 onValueChange = { input ->
                     if (input.all { it.isDigit() }) {
-                        total = input
+                        amount.value = input
                     }
                 },
                 label = { Text("Total") },
@@ -120,14 +134,14 @@ fun AddReceipt(
                 trailingIcon = { Text("$") }
             )
             OutlinedTextField(
-                value = date,
-                onValueChange = { date = it },
+                value = date.value,
+                onValueChange = { date.value = it },
                 label = { Text("Date") },
                 modifier = Modifier.padding(8.dp)
             )
             OutlinedTextField(
-                value = category,
-                onValueChange = { category = it },
+                value = category.value,
+                onValueChange = { category.value = it },
                 label = { Text("Category") },
                 modifier = Modifier.padding(8.dp)
             )
@@ -140,22 +154,37 @@ fun AddReceipt(
             ) {
                 FloatingActionButton(
                     onClick = { onFinish() },
-                    modifier = Modifier.padding(10.dp).size(40.dp),
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .size(40.dp),
                 ) {
                     Icon(Icons.Default.Close, contentDescription = "Cancel")
                 }
                 FloatingActionButton(
                     onClick = {
-                        val newReceipt = Receipt(
-                            store = store,
-                            amount = "$$total",
-                            date = date,
-                            category = category
-                        )
-                        receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
-                        onFinish()
+                        if (isEdit) {
+                            receiptViewModel.onEvent(ReceiptsEvent.ModifyReceipt(
+                                receiptToEdit!!.id!!,
+                                store.value,
+                                amount.value,
+                                date.value,
+                                category.value
+                            ))
+                            onFinish()
+                        } else {
+                            val newReceipt = Receipt(
+                                store = store.value,
+                                amount = "$${amount.value}",
+                                date = date.value,
+                                category = category.value
+                            )
+                            receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
+                            onFinish()
+                        }
                     },
-                    modifier = Modifier.padding(10.dp).size(40.dp),
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .size(40.dp),
                     containerColor = Color.LightGray
                 ) {
                     Icon(Icons.Default.Check, contentDescription = "Cancel")

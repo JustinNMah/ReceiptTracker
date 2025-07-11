@@ -7,17 +7,17 @@ import com.example.recipttracker.ui.launch.LandingScreen
 import com.example.recipttracker.ui.receiptslist.ReceiptListScreen
 import com.example.recipttracker.ui.login.LoginScreen
 import com.example.recipttracker.ui.signup.SignUpScreen
-import com.example.recipttracker.ui.addReceipt.Camera
-import com.example.recipttracker.ui.addReceipt.CameraRoll
-import com.example.recipttracker.ui.addReceipt.AddReceipt
+import com.example.recipttracker.ui.addEditReceipt.Camera
+import com.example.recipttracker.ui.addEditReceipt.CameraRoll
+import com.example.recipttracker.ui.addEditReceipt.AddEditReceipt
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.recipttracker.ui.addReceipt.DisplayImageViewModel
+import com.example.recipttracker.ui.addEditReceipt.ReceiptToEditOrAdd
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 
 @Composable
 fun AppNavigator() {
     val navController = rememberNavController()
-    val addReceiptViewModel: DisplayImageViewModel = viewModel()
+    val receiptToEditOrAdd: ReceiptToEditOrAdd = viewModel()
     val receiptViewModel: ReceiptViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = "landing") {
@@ -41,26 +41,28 @@ fun AppNavigator() {
             ReceiptListScreen(
                 onCapture = { navController.navigate("camera") },
                 onUpload = { navController.navigate("cameraRoll") },
+                onEdit = { navController.navigate("addEditReceipt") },
+                receiptToEditOrAdd,
                 receiptViewModel
             )
         }
 
         composable("camera") {
             Camera(
-                onFinish = { navController.navigate("addReceipt") },
-                addReceiptViewModel
+                onFinish = { navController.navigate("addEditReceipt") },
+                receiptToEditOrAdd
             )
         }
         composable("cameraRoll") {
             CameraRoll(
-                onFinish = { navController.navigate("addReceipt") },
-                addReceiptViewModel
+                onFinish = { navController.navigate("addEditReceipt") },
+                receiptToEditOrAdd
             )
         }
-        composable("addReceipt") {
-            AddReceipt(
+        composable("addEditReceipt") {
+            AddEditReceipt(
                 onFinish = { navController.navigate("receipts") },
-                addReceiptViewModel,
+                receiptToEditOrAdd,
                 receiptViewModel
             )
         }

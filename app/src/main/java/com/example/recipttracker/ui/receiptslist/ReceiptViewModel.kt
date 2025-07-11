@@ -1,5 +1,6 @@
 package com.example.recipttracker.ui.receiptslist
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -47,6 +48,7 @@ class ReceiptViewModel @Inject constructor(
                 }
             }
             is ReceiptsEvent.ModifyReceipt -> {
+                Log.d("TAG", "Modifying receipt with params ${event.id} ${event.store} ${event.amount} ${event.date} ${event.category}")
                 viewModelScope.launch {
                     repository.modifyReceipt(
                         event.id,
@@ -55,6 +57,11 @@ class ReceiptViewModel @Inject constructor(
                         event.date,
                         event.category
                     )
+                    Log.d("TAG", "Modifying receipt complete")
+
+                    repository.getReceipts().collect { receiptsList ->
+                        Log.d("TAG", "Receipts: $receiptsList")
+                    }
                 }
             }
         }
