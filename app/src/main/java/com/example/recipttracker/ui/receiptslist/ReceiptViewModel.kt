@@ -32,6 +32,11 @@ class ReceiptViewModel @Inject constructor(
 
     fun onEvent(event: ReceiptsEvent) { // create an event when user changes Sort Order or Deletes Receipt.
         when(event) {
+            is ReceiptsEvent.AddReceipt -> {
+                viewModelScope.launch {
+                    repository.insertReceipt(event.receipt)
+                }
+            }
             is ReceiptsEvent.Order -> {
                 val allReceipts = _state.value.receipts.values.flatten()
                 sortReceipts(allReceipts, event.receiptSortOrder)

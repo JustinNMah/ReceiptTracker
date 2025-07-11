@@ -1,6 +1,7 @@
 package com.example.recipttracker.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.*
 import com.example.recipttracker.ui.launch.LandingScreen
 import com.example.recipttracker.ui.receiptslist.ReceiptListScreen
@@ -11,11 +12,13 @@ import com.example.recipttracker.ui.addReceipt.CameraRoll
 import com.example.recipttracker.ui.addReceipt.AddReceipt
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.recipttracker.ui.addReceipt.DisplayImageViewModel
+import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 
 @Composable
 fun AppNavigator() {
     val navController = rememberNavController()
     val addReceiptViewModel: DisplayImageViewModel = viewModel()
+    val receiptViewModel: ReceiptViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = "landing") {
         composable("landing") {
@@ -37,7 +40,8 @@ fun AppNavigator() {
         composable("receipts") {
             ReceiptListScreen(
                 onCapture = { navController.navigate("camera") },
-                onUpload = { navController.navigate("cameraRoll") }
+                onUpload = { navController.navigate("cameraRoll") },
+                receiptViewModel
             )
         }
 
@@ -56,7 +60,8 @@ fun AppNavigator() {
         composable("addReceipt") {
             AddReceipt(
                 onFinish = { navController.navigate("receipts") },
-                addReceiptViewModel
+                addReceiptViewModel,
+                receiptViewModel
             )
         }
     }
