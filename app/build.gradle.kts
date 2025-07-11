@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.dagger.hilt)
     alias(libs.plugins.ksp)
     kotlin("kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -82,4 +83,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     // Retrofit - add dependencies for this when we store database in cloud
+
+    // Firebase Firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
 }
