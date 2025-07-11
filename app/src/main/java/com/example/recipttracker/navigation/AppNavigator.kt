@@ -9,7 +9,6 @@ import com.example.recipttracker.ui.signup.SignUpScreen
 import com.example.recipttracker.ui.addReceipt.Camera
 import com.example.recipttracker.ui.addReceipt.CameraRoll
 import com.example.recipttracker.ui.addReceipt.AddReceipt
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.recipttracker.ui.addReceipt.DisplayImageViewModel
 
