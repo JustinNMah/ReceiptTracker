@@ -1,4 +1,4 @@
-package com.example.recipttracker.ui.addReceipt
+package com.example.recipttracker.ui.addEditReceipt
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -11,11 +11,11 @@ import androidx.compose.runtime.SideEffect
 @Composable
 fun CameraRoll(
     onFinish: () -> Unit,
-    displayImageViewModel: DisplayImageViewModel
+    receiptToEditOrAdd: ReceiptToEditOrAdd
 ) {
     val handleClick: (Uri) -> Unit = { uri ->
         Log.d("TAG", "Uri path for photo: ${uri.toString()}")
-        displayImageViewModel.changeUriPath(uri.toString())
+        receiptToEditOrAdd.changeUriPath(uri.toString())
         onFinish()
     }
 

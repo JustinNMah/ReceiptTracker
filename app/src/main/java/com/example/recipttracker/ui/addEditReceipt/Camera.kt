@@ -1,4 +1,4 @@
-package com.example.recipttracker.ui.addReceipt
+package com.example.recipttracker.ui.addEditReceipt
 
 import android.net.Uri
 import android.util.Log
@@ -14,7 +14,7 @@ import androidx.compose.runtime.SideEffect
 @Composable
 fun Camera(
     onFinish: () -> Unit,
-    displayImageViewModel: DisplayImageViewModel
+    receiptToEditOrAdd: ReceiptToEditOrAdd
 ) {
     val diffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { uri ->
         Log.d("TAG", "$uri")
@@ -34,5 +34,5 @@ fun Camera(
     }
     Log.d("TAG", "Stored image into uriPath: ${uriPath}")
     Log.d("TAG", "toString(): ${uriPath.toString()}")
-    displayImageViewModel.changeUriPath(uriPath.toString())
+    receiptToEditOrAdd.changeUriPath(uriPath.toString())
 }

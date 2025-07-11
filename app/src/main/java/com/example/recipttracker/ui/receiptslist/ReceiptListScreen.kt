@@ -24,15 +24,18 @@ import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
+import com.example.recipttracker.ui.addEditReceipt.ReceiptToEditOrAdd
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReceiptListScreen(
     onCapture: () -> Unit,
     onUpload: () -> Unit,
-    viewModel: ReceiptViewModel
+    onEdit: () -> Unit,
+    receiptToEditOrAdd: ReceiptToEditOrAdd,
+    receiptViewModel: ReceiptViewModel
 ) {
-    val state = viewModel.state.value
+    val state = receiptViewModel.state.value
     val sortState = state.receiptSortOrder
     val receipts = state.receipts
     var showFabMenu by remember { mutableStateOf(false) }
@@ -122,7 +125,7 @@ fun ReceiptListScreen(
                             }
                             println("newSortState $newSortState")
                             val event = ReceiptsEvent.Order(newSortState)
-                            viewModel.onEvent(event)
+                            receiptViewModel.onEvent(event)
                         },
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index,
@@ -170,7 +173,7 @@ fun ReceiptListScreen(
                         }
                     }
                     items(items) { receipt ->
-                        ReceiptListItem(receipt, viewModel)
+                        ReceiptListItem(receipt, receiptToEditOrAdd, receiptViewModel, onEdit)
                     }
                 }
             }
@@ -179,7 +182,12 @@ fun ReceiptListScreen(
 }
 
 @Composable
-fun ReceiptListItem(receipt: Receipt, viewModel: ReceiptViewModel) {
+fun ReceiptListItem(
+    receipt: Receipt,
+    receiptToEditOrAdd: ReceiptToEditOrAdd,
+    viewModel: ReceiptViewModel,
+    onEdit: () -> Unit,
+) {
     var showModifyMenu by remember { mutableStateOf(false) }
 
     Card(
@@ -219,7 +227,8 @@ fun ReceiptListItem(receipt: Receipt, viewModel: ReceiptViewModel) {
                             text = { Text("Edit") },
                             onClick = {
                                 showModifyMenu = false
-                                viewModel.onEvent(ReceiptsEvent.DeleteReceipt(receipt))
+                                receiptToEditOrAdd.changeReceiptToEdit(receipt)
+                                onEdit()
                             }
                         )
                         DropdownMenuItem(

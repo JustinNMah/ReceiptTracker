@@ -1,5 +1,6 @@
 package com.example.recipttracker.data.repository
 
+import android.util.Log
 import com.example.recipttracker.data.local.ReceiptDao
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.repository.ReceiptRepository
@@ -32,6 +33,8 @@ class ReceiptRepositoryImpl(
         date: String,
         category: String
     ) {
-        dao.modifyReceipt(id, store, amount, date, category)
+        Log.d("TAG", "Modifying receipt in ReceiptRepositoryImpl")
+        val numberOfRowsAffected: Int = dao.modifyReceipt(id, store, amount, date, category)
+        Log.d("TAG", "Number of rows modified: $numberOfRowsAffected")
     }
 }
