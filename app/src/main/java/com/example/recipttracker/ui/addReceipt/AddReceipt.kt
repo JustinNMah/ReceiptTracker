@@ -1,10 +1,9 @@
-package com.example.recipttracker.ui.photo
+package com.example.recipttracker.ui.addReceipt
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Composable
-import java.io.File
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,39 +34,31 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.recipttracker.addReceipt.AddReceiptEvent
 import com.example.recipttracker.domain.model.Receipt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Photo(
-    filePath: String,
-    onFinish: () -> Unit, isUri: Boolean,
-    viewModel: PhotoViewModel = hiltViewModel()
+fun AddReceipt(
+    onFinish: () -> Unit,
+    displayImageViewModel: DisplayImageViewModel,
+    addReceiptViewModel: AddReceiptViewModel = hiltViewModel()
 ) {
+    val uriPath = displayImageViewModel.uriPath.observeAsState()
+    Log.d("TAG", "uriPath change notified in AddReceipt.kt: $uriPath")
     var bitmap: Bitmap? = null
 
-    Log.d("TAG", "File/uri path received in Photo.kt -> $filePath")
-
-    if (isUri) {
-        val myUri = Uri.parse(filePath)
-        val inputStream = LocalContext.current.contentResolver.openInputStream(myUri)
-        bitmap = BitmapFactory.decodeStream(inputStream)
-    } else {
-        val imgFile = File(filePath)
-
-        if (!imgFile.exists()) {
-            Log.d("TAG", "Image file $imgFile cannot be resolved in Photo.kt")
-            onFinish()
-        }
-        bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
-    }
+    val imgUri = Uri.parse(uriPath.value)
+    val inputStream = LocalContext.current.contentResolver.openInputStream(imgUri)
+    bitmap = BitmapFactory.decodeStream(inputStream)
 
     if (bitmap == null) {
-        Log.d("TAG", "Unable to convert $filePath into bitmap in Photo.kt")
+        Log.d("TAG", "Unable to convert $uriPath into bitmap in Photo.kt")
         onFinish()
     }
 
@@ -160,7 +151,7 @@ fun Photo(
                             date = date,
                             category = category
                         )
-                        viewModel.onEvent(PhotoEvent.InsertReceipt(newReceipt))
+                        addReceiptViewModel.onEvent(AddReceiptEvent.InsertReceipt(newReceipt))
                         onFinish()
                     },
                     modifier = Modifier.padding(10.dp).size(40.dp),
