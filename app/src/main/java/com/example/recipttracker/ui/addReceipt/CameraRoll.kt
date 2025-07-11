@@ -15,7 +15,6 @@ fun CameraRoll(
 ) {
     val handleClick: (Uri) -> Unit = { uri ->
         Log.d("TAG", "Uri path for photo: ${uri.toString()}")
-        onFinish()
         displayImageViewModel.changeUriPath(uri.toString())
         onFinish()
     }

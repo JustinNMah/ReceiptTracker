@@ -12,4 +12,6 @@ interface ReceiptRepository {
     suspend fun insertReceipt(receipt: Receipt)
 
     suspend fun deleteReceipt(receipt: Receipt)
+
+    suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String)
 }
