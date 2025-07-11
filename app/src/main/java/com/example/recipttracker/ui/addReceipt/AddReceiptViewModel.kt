@@ -1,19 +1,20 @@
-package com.example.recipttracker.ui.photo
+package com.example.recipttracker.ui.addReceipt
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.recipttracker.addReceipt.AddReceiptEvent
 import com.example.recipttracker.domain.repository.ReceiptRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
-class PhotoViewModel @Inject constructor(
+class AddReceiptViewModel @Inject constructor(
     private val repository: ReceiptRepository
 ): ViewModel() {
-    fun onEvent(event: PhotoEvent) {
+    fun onEvent(event: AddReceiptEvent) {
         when(event) {
-            is PhotoEvent.InsertReceipt -> {
+            is AddReceiptEvent.InsertReceipt -> {
                 viewModelScope.launch {
                     repository.insertReceipt(event.receipt)
                 }
