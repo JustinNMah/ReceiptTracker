@@ -1,5 +1,6 @@
 package com.example.recipttracker.ui.receiptslist
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,10 +15,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
@@ -167,7 +170,7 @@ fun ReceiptListScreen(
                         }
                     }
                     items(items) { receipt ->
-                        ReceiptListItem(receipt)
+                        ReceiptListItem(receipt, viewModel)
                     }
                 }
             }
@@ -176,7 +179,9 @@ fun ReceiptListScreen(
 }
 
 @Composable
-fun ReceiptListItem(receipt: Receipt) {
+fun ReceiptListItem(receipt: Receipt, viewModel: ReceiptViewModel) {
+    var showModifyMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -191,13 +196,41 @@ fun ReceiptListItem(receipt: Receipt) {
             supportingContent = {
                 Column {
                     Text(receipt.date)
+                    Text(
+                        text = receipt.amount,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                    )
                 }
             },
             trailingContent = {
-                Text(
-                    text = receipt.amount,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                )
+                Box {
+                    FloatingActionButton(
+                        onClick = { showModifyMenu = true }
+                    ) {
+                        val modifyIcon = painterResource(R.drawable.outline_edit_24)
+                        Icon(modifyIcon, contentDescription = "Modify receipt")
+                    }
+
+                    DropdownMenu(
+                        expanded = showModifyMenu,
+                        onDismissRequest = { showModifyMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = {
+                                showModifyMenu = false
+                                viewModel.onEvent(ReceiptsEvent.DeleteReceipt(receipt))
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = {
+                                showModifyMenu = false
+                                viewModel.onEvent(ReceiptsEvent.DeleteReceipt(receipt))
+                            }
+                        )
+                    }
+                }
             }
         )
     }
