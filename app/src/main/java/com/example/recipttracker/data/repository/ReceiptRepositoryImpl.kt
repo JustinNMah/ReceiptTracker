@@ -5,10 +5,13 @@ import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.repository.ReceiptRepository
 import kotlinx.coroutines.flow.Flow
 import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 
 class ReceiptRepositoryImpl(
-    private val dao: ReceiptDao
+    private val dao: ReceiptDao,
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ): ReceiptRepository {
 
     override fun getReceipts(): Flow<List<Receipt>> {

@@ -85,7 +85,6 @@ dependencies {
     // Retrofit - add dependencies for this when we store database in cloud
 
     // Firebase Firestore
-    implementation("com.google.firebase:firebase-firestore-ktx:24.9.1")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
 }
