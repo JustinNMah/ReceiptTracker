@@ -61,4 +61,22 @@ class ReceiptRepositoryImpl(
             .toObjects(Receipt::class.java)
     }
 
+    fun addTestReceipt() {
+        val receipt = hashMapOf(
+            "store" to "Costco",
+            "total" to 43.75,
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        firestore.collection("receipts")
+            .add(receipt)
+            .addOnSuccessListener { documentRef ->
+                Log.d("FirestoreTest", "Document added with ID: ${documentRef.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirestoreTest", "Error adding document", e)
+            }
+    }
+
+
 }
