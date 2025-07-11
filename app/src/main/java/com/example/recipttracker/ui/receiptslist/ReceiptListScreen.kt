@@ -30,7 +30,7 @@ import com.example.recipttracker.domain.util.SortField
 fun ReceiptListScreen(
     onCapture: () -> Unit,
     onUpload: () -> Unit,
-    viewModel: ReceiptViewModel = hiltViewModel()
+    viewModel: ReceiptViewModel
 ) {
     val state = viewModel.state.value
     val sortState = state.receiptSortOrder

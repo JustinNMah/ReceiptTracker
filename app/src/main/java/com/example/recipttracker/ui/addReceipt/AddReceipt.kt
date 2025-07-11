@@ -39,15 +39,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.recipttracker.addReceipt.AddReceiptEvent
 import com.example.recipttracker.domain.model.Receipt
+import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
+import com.example.recipttracker.ui.receiptslist.ReceiptsEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReceipt(
     onFinish: () -> Unit,
     displayImageViewModel: DisplayImageViewModel,
-    addReceiptViewModel: AddReceiptViewModel = hiltViewModel()
+    receiptViewModel: ReceiptViewModel
 ) {
     val uriPath = displayImageViewModel.uriPath.observeAsState()
     Log.d("TAG", "uriPath change notified in AddReceipt.kt: $uriPath")
@@ -151,7 +152,7 @@ fun AddReceipt(
                             date = date,
                             category = category
                         )
-                        addReceiptViewModel.onEvent(AddReceiptEvent.InsertReceipt(newReceipt))
+                        receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
                         onFinish()
                     },
                     modifier = Modifier.padding(10.dp).size(40.dp),
