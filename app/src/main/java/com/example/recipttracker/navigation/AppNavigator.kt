@@ -29,12 +29,14 @@ fun AppNavigator() {
         }
         composable("login"){
             LoginScreen(
-                onEnter = { navController.navigate("receipts") }
+                onEnter = { navController.navigate("receipts") },
+                onBack = { navController.navigate("landing") }
             )
         }
         composable("signup"){
             SignUpScreen(
-                onEnter = { navController.navigate("receipts") }
+                onEnter = { navController.navigate("receipts") },
+                onBack = { navController.navigate("landing") }
             )
         }
         composable("receipts") {
