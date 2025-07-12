@@ -15,12 +15,26 @@ import com.example.recipttracker.R
 import androidx.compose.ui.text.style.TextAlign
 
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
-fun SignUpScreen(onEnter: () -> Unit) {
+fun SignUpScreen(
+    viewModel: SignUpViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
+    onEnter: () -> Unit,
+    onBack: () -> Unit
+) {
+    val state by viewModel.state
+
+    LaunchedEffect(state.success) {
+        if (state.success) {
+            onEnter()
+        }
+    }
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -32,8 +46,24 @@ fun SignUpScreen(onEnter: () -> Unit) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.align(Alignment.Start)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+        }
 
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
         Image(
             painter = painterResource(id = R.drawable.logo),
@@ -85,10 +115,32 @@ fun SignUpScreen(onEnter: () -> Unit) {
             modifier = Modifier.width(240.dp),
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val errorMessage = state.error
+        if (!errorMessage.isNullOrEmpty()) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .width(240.dp),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = onEnter,
+            onClick = {
+                viewModel.onEvent(
+                    SignUpEvent.Register(
+                        username = username,
+                        password = password,
+                        confirmPassword = confirmPassword
+                    )
+                )
+            },
             modifier = Modifier.width(185.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -104,7 +156,7 @@ fun SignUpScreen(onEnter: () -> Unit) {
 @Composable
 fun SignUpScreenPreview() {
     ReceiptTrackerTheme {
-        SignUpScreen(onEnter = {})
+        SignUpScreen(onEnter = {}, onBack = {})
     }
 }
 
