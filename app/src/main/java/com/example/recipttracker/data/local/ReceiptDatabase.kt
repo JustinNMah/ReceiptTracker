@@ -6,7 +6,7 @@ import com.example.recipttracker.domain.model.Receipt
 
 @Database(
     entities = [Receipt::class],
-    version = 3
+    version = 1
 )
 abstract class ReceiptDatabase: RoomDatabase() {
 
