@@ -21,25 +21,14 @@ interface ReceiptDao {
     @Delete
     suspend fun deleteReceipt(receipt: Receipt) // TODO: Maybe change to deleteReceiptById
 
-    @Query("SELECT * FROM receipt ORDER BY date DESC")
-    fun getReceiptsByDateDesc(): Flow<List<Receipt>>
-
-    @Query("SELECT * FROM receipt ORDER BY date asc")
-    fun getReceiptsByDateAsc(): Flow<List<Receipt>>
-
-    @Query("SELECT * FROM receipt ORDER BY store DESC")
-    fun getReceiptsByStoreDesc(): Flow<List<Receipt>>
-
-    @Query("SELECT * FROM receipt ORDER BY store asc")
-    fun getReceiptsByStoreAsc(): Flow<List<Receipt>>
-
-    @Query("SELECT * FROM receipt ORDER BY category DESC")
-    fun getReceiptsByCategoryDesc(): Flow<List<Receipt>>
-
-    @Query("SELECT * FROM receipt ORDER BY category asc")
-    fun getReceiptsByCategoryAsc(): Flow<List<Receipt>>
+    @Query("SELECT * FROM receipt")
+    fun getReceipts(): Flow<List<Receipt>>
 
     @Query("SELECT * FROM receipt WHERE id = :id")
-    fun getReceiptById(id: Int): Receipt?
+    suspend fun getReceiptById(id: Int): Receipt?
 
+    @Query(
+        "UPDATE receipt SET store = :store, amount = :amount, date = :date, category = :category WHERE id = :id"
+    )
+    suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String): Int
 }
