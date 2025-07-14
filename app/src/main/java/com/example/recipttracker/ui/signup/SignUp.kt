@@ -20,10 +20,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.example.recipttracker.ViewModels.UserViewModel
+import com.example.recipttracker.domain.event.UserEvent
 
 @Composable
 fun SignUpScreen(
-    viewModel: SignUpViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
+    viewModel: UserViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
     onEnter: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -134,7 +136,7 @@ fun SignUpScreen(
         Button(
             onClick = {
                 viewModel.onEvent(
-                    SignUpEvent.Register(
+                    UserEvent.SignUp(
                         username = username,
                         password = password,
                         confirmPassword = confirmPassword

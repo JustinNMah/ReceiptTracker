@@ -20,10 +20,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.example.recipttracker.ViewModels.UserViewModel
+import com.example.recipttracker.domain.event.UserEvent
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
+    viewModel: UserViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
     onEnter: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -119,7 +121,7 @@ fun LoginScreen(
         Button(
             onClick = {
                 viewModel.onEvent(
-                    LoginEvent.Login(username = username, password = password)
+                    UserEvent.Login(username = username, password = password)
                 )
             },
             modifier = Modifier.width(185.dp),

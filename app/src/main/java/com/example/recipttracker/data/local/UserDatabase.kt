@@ -6,7 +6,7 @@ import com.example.recipttracker.domain.model.User
 
 @Database(
     entities = [User::class],
-    version = 3
+    version = 1
 )
 abstract class UserDatabase: RoomDatabase() {
 

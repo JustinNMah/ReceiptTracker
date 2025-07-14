@@ -44,8 +44,7 @@ fun AppNavigator() {
                 onCapture = { navController.navigate("camera") },
                 onUpload = { navController.navigate("cameraRoll") },
                 onEdit = { navController.navigate("addEditReceipt") },
-                receiptToEditOrAdd,
-                receiptViewModel
+                onLogout = { navController.navigate("landing") },
             )
         }
 
