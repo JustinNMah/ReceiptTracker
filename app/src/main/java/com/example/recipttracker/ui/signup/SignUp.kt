@@ -25,11 +25,11 @@ import com.example.recipttracker.domain.event.UserEvent
 
 @Composable
 fun SignUpScreen(
-    viewModel: UserViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
+    userViewModel: UserViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
     onEnter: () -> Unit,
     onBack: () -> Unit
 ) {
-    val state by viewModel.state
+    val state by userViewModel.state
 
     LaunchedEffect(state.success) {
         if (state.success) {
@@ -135,7 +135,7 @@ fun SignUpScreen(
 
         Button(
             onClick = {
-                viewModel.onEvent(
+                userViewModel.onEvent(
                     UserEvent.SignUp(
                         username = username,
                         password = password,

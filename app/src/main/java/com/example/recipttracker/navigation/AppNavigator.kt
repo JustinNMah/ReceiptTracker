@@ -13,12 +13,14 @@ import com.example.recipttracker.ui.addEditReceipt.AddEditReceipt
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.recipttracker.ui.addEditReceipt.ReceiptToEditOrAdd
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
+import com.example.recipttracker.ViewModels.UserViewModel
 
 @Composable
 fun AppNavigator() {
     val navController = rememberNavController()
     val receiptToEditOrAdd: ReceiptToEditOrAdd = viewModel()
     val receiptViewModel: ReceiptViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = "landing") {
         composable("landing") {
@@ -30,13 +32,15 @@ fun AppNavigator() {
         composable("login"){
             LoginScreen(
                 onEnter = { navController.navigate("receipts") },
-                onBack = { navController.navigate("landing") }
+                onBack = { navController.navigate("landing") },
+                userViewModel = userViewModel,
             )
         }
         composable("signup"){
             SignUpScreen(
                 onEnter = { navController.navigate("receipts") },
-                onBack = { navController.navigate("landing") }
+                onBack = { navController.navigate("landing") },
+                userViewModel = userViewModel,
             )
         }
         composable("receipts") {
@@ -45,6 +49,7 @@ fun AppNavigator() {
                 onUpload = { navController.navigate("cameraRoll") },
                 onEdit = { navController.navigate("addEditReceipt") },
                 onLogout = { navController.navigate("landing") },
+                userViewModel = userViewModel,
             )
         }
 
@@ -64,7 +69,8 @@ fun AppNavigator() {
             AddEditReceipt(
                 onFinish = { navController.navigate("receipts") },
                 receiptToEditOrAdd,
-                receiptViewModel
+                receiptViewModel,
+                userViewModel,
             )
         }
     }

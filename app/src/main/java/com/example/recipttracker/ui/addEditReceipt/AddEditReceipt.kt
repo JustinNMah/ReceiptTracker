@@ -41,14 +41,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptsEvent
+import com.example.recipttracker.ViewModels.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditReceipt(
     onFinish: () -> Unit,
     receiptToEditOrAdd: ReceiptToEditOrAdd,
-    receiptViewModel: ReceiptViewModel
+    receiptViewModel: ReceiptViewModel,
+    userViewModel: UserViewModel
 ) {
+    val userState = userViewModel.state.value
+    val user = userState.user
+
     val uriPath = receiptToEditOrAdd.uriPath.observeAsState()
     Log.d("TAG", "uriPath change notified in AddEditReceipt.kt: $uriPath")
     var bitmap: Bitmap? = null
@@ -171,15 +176,20 @@ fun AddEditReceipt(
                                 category.value
                             ))
                             onFinish()
-                        } else {
-                            val newReceipt = Receipt(
-                                store = store.value,
-                                amount = "$${amount.value}",
-                                date = date.value,
-                                category = category.value
-                            )
-                            receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
-                            onFinish()
+                        }  else {
+                            user?.let {
+                                val newReceipt = Receipt(
+                                    store = store.value,
+                                    amount = "$${amount.value}",
+                                    date = date.value,
+                                    category = category.value,
+                                    userId = it.id
+                                )
+                                receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
+                                onFinish()
+                            } ?: run {
+                                Log.e("AddEditReceipt", "Cannot add receipt: user is not logged in.")
+                            }
                         }
                     },
                     modifier = Modifier
