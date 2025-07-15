@@ -19,12 +19,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
-import com.example.recipttracker.ui.addEditReceipt.ReceiptToEditOrAdd
+import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,8 +31,8 @@ fun ReceiptListScreen(
     onCapture: () -> Unit,
     onUpload: () -> Unit,
     onEdit: () -> Unit,
-    receiptToEditOrAdd: ReceiptToEditOrAdd,
-    receiptViewModel: ReceiptViewModel
+    receiptViewModel: ReceiptViewModel,
+    modifyReceiptVM: ModifyReceiptVM // need to further drill this to ReceiptListItem composable, which could be bad design
 ) {
     val state = receiptViewModel.state.value
     val sortState = state.receiptSortOrder
@@ -173,7 +172,7 @@ fun ReceiptListScreen(
                         }
                     }
                     items(items) { receipt ->
-                        ReceiptListItem(receipt, receiptToEditOrAdd, receiptViewModel, onEdit)
+                        ReceiptListItem(receipt, receiptViewModel, modifyReceiptVM, onEdit) // might have to change later. this drilling is probably bad design
                     }
                 }
             }
@@ -184,8 +183,8 @@ fun ReceiptListScreen(
 @Composable
 fun ReceiptListItem(
     receipt: Receipt,
-    receiptToEditOrAdd: ReceiptToEditOrAdd,
     viewModel: ReceiptViewModel,
+    modifyReceiptVM: ModifyReceiptVM,
     onEdit: () -> Unit,
 ) {
     var showModifyMenu by remember { mutableStateOf(false) }
@@ -227,7 +226,8 @@ fun ReceiptListItem(
                             text = { Text("Edit") },
                             onClick = {
                                 showModifyMenu = false
-                                receiptToEditOrAdd.changeReceiptToEdit(receipt)
+                                Log.d("TAG", "Changing receipt to edit in ReceiptListScreen: $receipt")
+                                modifyReceiptVM.setReceiptToEdit(receipt)
                                 onEdit()
                             }
                         )

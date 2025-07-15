@@ -31,10 +31,11 @@ class ReceiptRepositoryImpl(
         store: String,
         amount: String,
         date: String,
-        category: String
+        category: String,
+        uriPath: String
     ) {
         Log.d("TAG", "Modifying receipt in ReceiptRepositoryImpl")
-        val numberOfRowsAffected: Int = dao.modifyReceipt(id, store, amount, date, category)
+        val numberOfRowsAffected: Int = dao.modifyReceipt(id, store, amount, date, category, uriPath)
         Log.d("TAG", "Number of rows modified: $numberOfRowsAffected")
     }
 }

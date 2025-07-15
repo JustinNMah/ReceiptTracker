@@ -22,7 +22,7 @@ class ReceiptViewModel @Inject constructor(
     private val repository: ReceiptRepository
 ): ViewModel() {
 
-    private val _state = mutableStateOf (ReceiptsListState())
+    private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
 
     private var getReceiptsCoroutine: Job? = null
@@ -55,7 +55,8 @@ class ReceiptViewModel @Inject constructor(
                         event.store,
                         event.amount,
                         event.date,
-                        event.category
+                        event.category,
+                        event.uriPath
                     )
                     Log.d("TAG", "Modifying receipt complete")
 

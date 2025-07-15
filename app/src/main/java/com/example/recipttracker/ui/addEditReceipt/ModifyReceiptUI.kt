@@ -1,8 +1,11 @@
 package com.example.recipttracker.ui.addEditReceipt
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -42,45 +45,25 @@ import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptsEvent
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddEditReceipt(
+@OptIn(ExperimentalMaterial3Api::class)
+fun ModifyReceiptUI(
     onFinish: () -> Unit,
-    receiptToEditOrAdd: ReceiptToEditOrAdd,
+    modifyReceiptVM: ModifyReceiptVM,
     receiptViewModel: ReceiptViewModel
 ) {
-    val uriPath = receiptToEditOrAdd.uriPath.observeAsState()
-    Log.d("TAG", "uriPath change notified in AddEditReceipt.kt: $uriPath")
-    var bitmap: Bitmap? = null
+    Log.d("TAG", "Mode: ${modifyReceiptVM.mode}")
 
-    val imgUri = Uri.parse(uriPath.value)
+    // update states when modifying text field (set initial values to be those in VM)
+    val store: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.store.value!!) }
+    val amount: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.amount.value!!) }
+    val date: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.date.value!!) }
+    val category: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.category.value!!) }
+    val uriPath: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.uriPath.value!!) }
+
+    val imgUri: Uri = Uri.parse(uriPath.value)
     val inputStream = LocalContext.current.contentResolver.openInputStream(imgUri)
-    bitmap = BitmapFactory.decodeStream(inputStream)
-
-    if (bitmap == null) {
-        Log.d("TAG", "Unable to convert $uriPath into bitmap in Photo.kt")
-        onFinish()
-    }
-
-    val receiptToEdit: Receipt? = receiptToEditOrAdd.receiptToEdit.getValue()
-    val isEdit: Boolean = receiptToEdit != null
-
-    lateinit var date: MutableState<String>
-    lateinit var amount: MutableState<String>
-    lateinit var store: MutableState<String>
-    lateinit var category: MutableState<String>
-
-    if (!isEdit) { // no receipt to edit. add instead
-        date = remember { mutableStateOf("") }
-        amount = remember { mutableStateOf("") }
-        store = remember { mutableStateOf("") }
-        category = remember { mutableStateOf("") }
-    } else { // edit receipt
-        date = remember { mutableStateOf(receiptToEdit!!.date) }
-        amount = remember { mutableStateOf(receiptToEdit!!.amount) }
-        store = remember { mutableStateOf(receiptToEdit!!.store) }
-        category = remember { mutableStateOf(receiptToEdit!!.category) }
-    }
+    val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
 
     Scaffold(
         topBar = {
@@ -123,6 +106,7 @@ fun AddEditReceipt(
             OutlinedTextField(
                 value = amount.value,
                 onValueChange = { input ->
+                    Log.d("TAG", input)
                     if (input.all { it.isDigit() }) {
                         amount.value = input
                     }
@@ -162,25 +146,29 @@ fun AddEditReceipt(
                 }
                 FloatingActionButton(
                     onClick = {
-                        if (isEdit) {
-                            receiptViewModel.onEvent(ReceiptsEvent.ModifyReceipt(
-                                receiptToEdit!!.id!!,
-                                store.value,
-                                amount.value,
-                                date.value,
-                                category.value
-                            ))
-                            onFinish()
-                        } else {
-                            val newReceipt = Receipt(
-                                store = store.value,
-                                amount = "$${amount.value}",
-                                date = date.value,
-                                category = category.value
-                            )
-                            receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
-                            onFinish()
+                        when (modifyReceiptVM.mode.value) {
+                            Mode.EDIT -> {
+                                receiptViewModel.onEvent(ReceiptsEvent.ModifyReceipt(
+                                    modifyReceiptVM.receiptId.value!!,
+                                    store.value,
+                                    amount.value,
+                                    date.value,
+                                    category.value,
+                                    uriPath.value
+                                ))
+                            }
+                            Mode.ADD -> {
+                                val newReceipt = Receipt(
+                                    store = store.value,
+                                    amount = amount.value,
+                                    date = date.value,
+                                    category = category.value,
+                                    uriPath = uriPath.value
+                                )
+                                receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
+                            }
                         }
+                        onFinish()
                     },
                     modifier = Modifier
                         .padding(10.dp)
