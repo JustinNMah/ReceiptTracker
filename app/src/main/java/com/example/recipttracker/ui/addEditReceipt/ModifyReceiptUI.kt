@@ -37,7 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptsEvent
@@ -69,17 +71,23 @@ fun ModifyReceiptUI(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("ReceiptTracker", textAlign = TextAlign.Center) },
+                title = {},
                 navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        IconButton(onClick = {
+                            onFinish()
+                        }) {
+                            Icon(
+                                painterResource(R.drawable.outline_keyboard_backspace_24),
+                                contentDescription = "Back"
+                            )
+                        }
+                        Text("Back to Receipts")
                     }
                 },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                }
+                actions = {}
             )
         }
     ) { innerPadding ->
@@ -94,7 +102,7 @@ fun ModifyReceiptUI(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "Receipt Image",
                     modifier = Modifier
-                        .padding(top = 16.dp)
+                        .padding(top = 16.dp, bottom = 16.dp)
                         .size(200.dp)
                 )
             }
