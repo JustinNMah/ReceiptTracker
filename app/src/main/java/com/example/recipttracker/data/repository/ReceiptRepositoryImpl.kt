@@ -10,12 +10,12 @@ class ReceiptRepositoryImpl(
     private val dao: ReceiptDao
 ): ReceiptRepository {
 
-    override fun getReceipts(): Flow<List<Receipt>> {
-        return dao.getReceipts()
+    override fun getReceipts(userId: Int): Flow<List<Receipt>> {
+        return dao.getReceipts(userId)
     }
 
-    override suspend fun getReceiptById(id: Int): Receipt? {
-        return dao.getReceiptById(id)
+    override suspend fun getReceiptById(id: Int, userId: Int): Receipt? {
+        return dao.getReceiptById(id, userId)
     }
 
     override suspend fun insertReceipt(receipt: Receipt) {

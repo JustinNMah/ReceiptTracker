@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -37,22 +35,25 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptsEvent
+import com.example.recipttracker.ViewModels.UserViewModel
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ModifyReceiptUI(
     onFinish: () -> Unit,
     modifyReceiptVM: ModifyReceiptVM,
-    receiptViewModel: ReceiptViewModel
+    receiptViewModel: ReceiptViewModel,
+    userViewModel: UserViewModel
 ) {
-    Log.d("TAG", "Mode: ${modifyReceiptVM.mode}")
+    Log.d("ModifyReceiptUI", "Mode: ${modifyReceiptVM.mode}")
+    val userState = userViewModel.state.value
+    val user = userState.user
 
     // update states when modifying text field (set initial values to be those in VM)
     val store: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.store.value!!) }
@@ -106,7 +107,7 @@ fun ModifyReceiptUI(
             OutlinedTextField(
                 value = amount.value,
                 onValueChange = { input ->
-                    Log.d("TAG", input)
+                    Log.d("ModifyReceiptUI", input)
                     if (input.all { it.isDigit() }) {
                         amount.value = input
                     }
@@ -148,24 +149,34 @@ fun ModifyReceiptUI(
                     onClick = {
                         when (modifyReceiptVM.mode.value) {
                             Mode.EDIT -> {
-                                receiptViewModel.onEvent(ReceiptsEvent.ModifyReceipt(
-                                    modifyReceiptVM.receiptId.value!!,
-                                    store.value,
-                                    amount.value,
-                                    date.value,
-                                    category.value,
-                                    uriPath.value
-                                ))
+                                user?.let {
+                                    receiptViewModel.onEvent(ReceiptsEvent.ModifyReceipt(
+                                        modifyReceiptVM.receiptId.value!!,
+                                        store.value,
+                                        amount.value,
+                                        date.value,
+                                        category.value,
+                                        uriPath.value
+                                    ))
+                                } ?: run {
+                                    Log.e("ModifyReceiptUI", "Cannot edit receipt: user is not logged in.")
+                                }
                             }
                             Mode.ADD -> {
-                                val newReceipt = Receipt(
-                                    store = store.value,
-                                    amount = amount.value,
-                                    date = date.value,
-                                    category = category.value,
-                                    uriPath = uriPath.value
-                                )
-                                receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
+                                user?.let {
+                                    val newReceipt = Receipt(
+                                        userId = it.id,
+                                        store = store.value,
+                                        amount = amount.value,
+                                        date = date.value,
+                                        category = category.value,
+                                        uriPath = uriPath.value
+
+                                    )
+                                    receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
+                                } ?: run {
+                                    Log.e("ModifyReceiptUI", "Cannot add receipt: user is not logged in.")
+                                }
                             }
                         }
                         onFinish()

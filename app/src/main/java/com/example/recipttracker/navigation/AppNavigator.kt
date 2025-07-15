@@ -19,12 +19,14 @@ import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptUI
+import com.example.recipttracker.ViewModels.UserViewModel
 
 @Composable
 fun AppNavigator() {
     val navController = rememberNavController()
     val receiptViewModel: ReceiptViewModel = hiltViewModel()
     val modifyReceiptVM: ModifyReceiptVM = viewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = "receipts") {
         composable("landing") {
@@ -36,13 +38,15 @@ fun AppNavigator() {
         composable("login"){
             LoginScreen(
                 onEnter = { navController.navigate("receipts") },
-                onBack = { navController.navigate("landing") }
+                onBack = { navController.navigate("landing") },
+                userViewModel = userViewModel,
             )
         }
         composable("signup"){
             SignUpScreen(
                 onEnter = { navController.navigate("receipts") },
-                onBack = { navController.navigate("landing") }
+                onBack = { navController.navigate("landing") },
+                userViewModel = userViewModel,
             )
         }
         composable("receipts") {
@@ -51,7 +55,9 @@ fun AppNavigator() {
                 onUpload = { navController.navigate("cameraRoll") },
                 onEdit = { navController.navigate("modifyReceiptUI") },
                 receiptViewModel = receiptViewModel,
-                modifyReceiptVM = modifyReceiptVM
+                modifyReceiptVM = modifyReceiptVM,
+                onLogout = { navController.navigate("landing") },
+                userViewModel = userViewModel
             )
         }
         composable("camera") {
@@ -72,7 +78,8 @@ fun AppNavigator() {
             ModifyReceiptUI(
                 onFinish = { navController.navigate("receipts") },
                 modifyReceiptVM = modifyReceiptVM,
-                receiptViewModel = receiptViewModel
+                receiptViewModel = receiptViewModel,
+                userViewModel = userViewModel
             )
         }
     }

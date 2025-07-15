@@ -11,6 +11,7 @@ import java.util.Locale
 @Entity
 data class Receipt(
     @PrimaryKey val id: Int? = null,
+    val userId: Int, // Maps to the userId
     val store: String,
     val amount: String,
     val date: String, // format as: yyyy-MM-dd

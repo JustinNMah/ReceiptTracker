@@ -26,8 +26,13 @@ class ReceiptViewModel @Inject constructor(
     val state: State<ReceiptsListState> = _state
 
     private var getReceiptsCoroutine: Job? = null
-
+    private var userId: Int? = null
     init {
+        getReceipts(_state.value.receiptSortOrder)
+    }
+
+    fun setUser(userId: Int) {
+        this.userId = userId
         getReceipts(_state.value.receiptSortOrder)
     }
 
@@ -48,7 +53,6 @@ class ReceiptViewModel @Inject constructor(
                 }
             }
             is ReceiptsEvent.ModifyReceipt -> {
-                Log.d("TAG", "Modifying receipt with params ${event.id} ${event.store} ${event.amount} ${event.date} ${event.category}")
                 viewModelScope.launch {
                     repository.modifyReceipt(
                         event.id,
@@ -58,21 +62,21 @@ class ReceiptViewModel @Inject constructor(
                         event.category,
                         event.uriPath
                     )
-                    Log.d("TAG", "Modifying receipt complete")
-
-                    repository.getReceipts().collect { receiptsList ->
-                        Log.d("TAG", "Receipts: $receiptsList")
-                    }
                 }
             }
         }
     }
 
     private fun getReceipts(receiptSortOrder: ReceiptSortOrder) {
+        val uid = userId ?: run {
+            Log.e("ReceiptViewModel", "getReceipts: userId is null, aborting fetch")
+            return
+        }
+
         getReceiptsCoroutine?.cancel()
         println("In getReceipts")
 
-        getReceiptsCoroutine = repository.getReceipts()
+        getReceiptsCoroutine = repository.getReceipts(uid)
             .onEach { receipts ->
                 sortReceipts(receipts, receiptSortOrder)
             }
