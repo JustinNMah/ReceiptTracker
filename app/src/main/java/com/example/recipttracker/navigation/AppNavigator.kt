@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptUI
 import com.example.recipttracker.ViewModels.UserViewModel
+import com.example.recipttracker.ui.receiptslist.ViewReceipt
 
 @Composable
 fun AppNavigator() {
@@ -47,11 +48,19 @@ fun AppNavigator() {
             ReceiptListScreen(
                 onCapture = { navController.navigate("camera") },
                 onUpload = { navController.navigate("cameraRoll") },
+                onLogout = { navController.navigate("landing") },
+                onView = { navController.navigate("viewReceipt") },
+                receiptViewModel = receiptViewModel,
+                userViewModel = userViewModel,
+                modifyReceiptVM = modifyReceiptVM
+            )
+        }
+        composable("viewReceipt") {
+            ViewReceipt(
+                onBack = { navController.navigate("receipts") },
                 onEdit = { navController.navigate("modifyReceiptUI") },
                 receiptViewModel = receiptViewModel,
-                modifyReceiptVM = modifyReceiptVM,
-                onLogout = { navController.navigate("landing") },
-                userViewModel = userViewModel
+                modifyReceiptVM = modifyReceiptVM
             )
         }
         composable("camera") {

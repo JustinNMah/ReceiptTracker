@@ -151,7 +151,7 @@ fun ModifyReceiptUI(
                             Mode.EDIT -> {
                                 user?.let {
                                     receiptViewModel.onEvent(ReceiptsEvent.ModifyReceipt(
-                                        modifyReceiptVM.receiptId.value!!,
+                                        modifyReceiptVM.receiptToEdit.value!!.id!!,
                                         store.value,
                                         amount.value,
                                         date.value,
@@ -171,7 +171,6 @@ fun ModifyReceiptUI(
                                         date = date.value,
                                         category = category.value,
                                         uriPath = uriPath.value
-
                                     )
                                     receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
                                 } ?: run {

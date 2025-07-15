@@ -25,6 +25,10 @@ import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
 import com.example.recipttracker.ViewModels.UserViewModel
 import kotlinx.coroutines.launch
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import com.example.recipttracker.domain.event.UserEvent
 import kotlinx.coroutines.flow.collectLatest
@@ -34,13 +38,12 @@ import kotlinx.coroutines.flow.collectLatest
 fun ReceiptListScreen(
     onCapture: () -> Unit,
     onUpload: () -> Unit,
-    onEdit: () -> Unit,
-    receiptViewModel: ReceiptViewModel,
-    modifyReceiptVM: ModifyReceiptVM, // need to further drill this to ReceiptListItem composable, which could be bad design
     onLogout: () -> Unit,
-    userViewModel: UserViewModel
+    onView: () -> Unit,
+    receiptViewModel: ReceiptViewModel,
+    userViewModel: UserViewModel,
+    modifyReceiptVM: ModifyReceiptVM
 ) {
-
     LaunchedEffect(Unit) {
         snapshotFlow { userViewModel.state.value.user }
             .collectLatest { user ->
@@ -196,7 +199,7 @@ fun ReceiptListScreen(
                             }
                         }
                         items(items) { receipt ->
-                            ReceiptListItem(receipt, receiptViewModel, modifyReceiptVM, onEdit) // might have to change later. this drilling is probably bad design
+                            ReceiptListItem(onView, receipt, modifyReceiptVM) // might have to change later. this drilling is probably bad design
                         }
                     }
                 }
@@ -207,20 +210,27 @@ fun ReceiptListScreen(
 
 @Composable
 fun ReceiptListItem(
+    onView: () -> Unit,
     receipt: Receipt,
-    viewModel: ReceiptViewModel,
-    modifyReceiptVM: ModifyReceiptVM,
-    onEdit: () -> Unit,
+    modifyReceiptVM: ModifyReceiptVM
 ) {
     var showModifyMenu by remember { mutableStateOf(false) }
+    val cardShape = RoundedCornerShape(12.dp)
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .border(1.dp, Color.Gray, cardShape)
+            .clickable {
+                Log.d("ReceiptListScreen", "Receipt ${receipt.id} pressed")
+                modifyReceiptVM.setReceiptToEdit(receipt)
+                onView()
+            }
+        ,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondary
+            containerColor = Color.Transparent
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = cardShape,
     ) {
         ListItem(
             headlineContent = { Text(receipt.store) },
@@ -230,36 +240,10 @@ fun ReceiptListItem(
                 }
             },
             trailingContent = {
-                Box {
-                    FloatingActionButton(
-                        onClick = { showModifyMenu = true }
-                    ) {
-                        val modifyIcon = painterResource(R.drawable.outline_edit_24)
-                        Icon(modifyIcon, contentDescription = "Modify receipt")
-                    }
-
-                    DropdownMenu(
-                        expanded = showModifyMenu,
-                        onDismissRequest = { showModifyMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = {
-                                showModifyMenu = false
-                                Log.d("TAG", "Changing receipt to edit in ReceiptListScreen: $receipt")
-                                modifyReceiptVM.setReceiptToEdit(receipt)
-                                onEdit()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
-                            onClick = {
-                                showModifyMenu = false
-                                viewModel.onEvent(ReceiptsEvent.DeleteReceipt(receipt))
-                            }
-                        )
-                    }
-                }
+                Text(
+                    text = "$${receipt.amount}",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                )
             }
         )
     }
