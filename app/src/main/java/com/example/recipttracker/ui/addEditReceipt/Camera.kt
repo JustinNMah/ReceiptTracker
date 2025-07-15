@@ -14,13 +14,9 @@ import androidx.compose.runtime.SideEffect
 @Composable
 fun Camera(
     onFinish: () -> Unit,
-    receiptToEditOrAdd: ReceiptToEditOrAdd
+    onFail: () -> Unit,
+    modifyReceiptVM: ModifyReceiptVM
 ) {
-    val diffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { uri ->
-        Log.d("TAG", "$uri")
-        onFinish()
-    }
-
     val filePath: File = File(LocalContext.current.getFilesDir(), "${System.currentTimeMillis()}")
     Log.d("TAG", "Creating filePath: $filePath")
     val uriPath: Uri = FileProvider.getUriForFile(
@@ -29,10 +25,19 @@ fun Camera(
         filePath
     )
 
-    SideEffect {
+    val diffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { status ->
+        Log.d("TAG", "$status")
+
+        if (status) {
+            Log.d("TAG", "Stored image into uriPath: $uriPath")
+            modifyReceiptVM.setReceiptToAdd(uriPath.toString())
+            onFinish()
+        } else {
+            onFail()
+        }
+    }
+
+    SideEffect { // this is a side effect because it modifies modifyReceiptVM state outside this composable
         diffLauncher.launch(uriPath)
     }
-    Log.d("TAG", "Stored image into uriPath: ${uriPath}")
-    Log.d("TAG", "toString(): ${uriPath.toString()}")
-    receiptToEditOrAdd.changeUriPath(uriPath.toString())
 }

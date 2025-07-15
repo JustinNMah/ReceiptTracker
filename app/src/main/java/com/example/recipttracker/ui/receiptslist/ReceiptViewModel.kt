@@ -22,7 +22,7 @@ class ReceiptViewModel @Inject constructor(
     private val repository: ReceiptRepository
 ): ViewModel() {
 
-    private val _state = mutableStateOf (ReceiptsListState())
+    private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
 
     private var getReceiptsCoroutine: Job? = null
@@ -53,24 +53,19 @@ class ReceiptViewModel @Inject constructor(
                 }
             }
             is ReceiptsEvent.ModifyReceipt -> {
-                userId?.let { uid ->
-                    Log.d("TAG", "Modifying receipt with params ${event.id} ${event.store} ${event.amount} ${event.date} ${event.category}")
-                    viewModelScope.launch {
-                        repository.modifyReceipt(
-                            event.id,
-                            event.store,
-                            event.amount,
-                            event.date,
-                            event.category
-                        )
-                        Log.d("TAG", "Modifying receipt complete")
-                        getReceipts(_state.value.receiptSortOrder)
-                    }
-                } ?: Log.e("ReceiptViewModel", "ModifyReceipt: userId is null")
+                viewModelScope.launch {
+                    repository.modifyReceipt(
+                        event.id,
+                        event.store,
+                        event.amount,
+                        event.date,
+                        event.category,
+                        event.uriPath
+                    )
+                }
             }
         }
     }
-
 
     private fun getReceipts(receiptSortOrder: ReceiptSortOrder) {
         val uid = userId ?: run {

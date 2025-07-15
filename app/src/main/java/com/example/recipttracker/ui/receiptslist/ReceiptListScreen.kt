@@ -17,13 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.recipttracker.ViewModels.UserViewModel
+import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
+import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
+import com.example.recipttracker.ViewModels.UserViewModel
 import kotlinx.coroutines.launch
 import android.util.Log
+import androidx.compose.ui.res.painterResource
 import com.example.recipttracker.domain.event.UserEvent
 import kotlinx.coroutines.flow.collectLatest
 
@@ -33,8 +35,9 @@ fun ReceiptListScreen(
     onCapture: () -> Unit,
     onUpload: () -> Unit,
     onEdit: () -> Unit,
+    receiptViewModel: ReceiptViewModel,
+    modifyReceiptVM: ModifyReceiptVM, // need to further drill this to ReceiptListItem composable, which could be bad design
     onLogout: () -> Unit,
-    viewModel: ReceiptViewModel = hiltViewModel(),
     userViewModel: UserViewModel
 ) {
 
@@ -42,14 +45,14 @@ fun ReceiptListScreen(
         snapshotFlow { userViewModel.state.value.user }
             .collectLatest { user ->
                 if (user != null) {
-                    viewModel.setUser(user.id)
+                    receiptViewModel.setUser(user.id)
                 }
             }
     }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val state = viewModel.state.value
+    val state = receiptViewModel.state.value
     val sortState = state.receiptSortOrder
     val receipts = state.receipts
     var showFabMenu by remember { mutableStateOf(false) }
@@ -145,7 +148,7 @@ fun ReceiptListScreen(
                                         ReceiptSortOrder(option, isAscending = true)
                                     }
                                 }
-                                viewModel.onEvent(ReceiptsEvent.Order(newSortState))
+                                receiptViewModel.onEvent(ReceiptsEvent.Order(newSortState))
                             },
                             shape = SegmentedButtonDefaults.itemShape(
                                 index = index,
@@ -193,7 +196,7 @@ fun ReceiptListScreen(
                             }
                         }
                         items(items) { receipt ->
-                            ReceiptListItem(receipt)
+                            ReceiptListItem(receipt, receiptViewModel, modifyReceiptVM, onEdit) // might have to change later. this drilling is probably bad design
                         }
                     }
                 }
@@ -203,7 +206,13 @@ fun ReceiptListScreen(
 }
 
 @Composable
-fun ReceiptListItem(receipt: Receipt) {
+fun ReceiptListItem(
+    receipt: Receipt,
+    viewModel: ReceiptViewModel,
+    modifyReceiptVM: ModifyReceiptVM,
+    onEdit: () -> Unit,
+) {
+    var showModifyMenu by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -221,10 +230,36 @@ fun ReceiptListItem(receipt: Receipt) {
                 }
             },
             trailingContent = {
-                Text(
-                    text = receipt.amount,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
-                )
+                Box {
+                    FloatingActionButton(
+                        onClick = { showModifyMenu = true }
+                    ) {
+                        val modifyIcon = painterResource(R.drawable.outline_edit_24)
+                        Icon(modifyIcon, contentDescription = "Modify receipt")
+                    }
+
+                    DropdownMenu(
+                        expanded = showModifyMenu,
+                        onDismissRequest = { showModifyMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = {
+                                showModifyMenu = false
+                                Log.d("TAG", "Changing receipt to edit in ReceiptListScreen: $receipt")
+                                modifyReceiptVM.setReceiptToEdit(receipt)
+                                onEdit()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = {
+                                showModifyMenu = false
+                                viewModel.onEvent(ReceiptsEvent.DeleteReceipt(receipt))
+                            }
+                        )
+                    }
+                }
             }
         )
     }

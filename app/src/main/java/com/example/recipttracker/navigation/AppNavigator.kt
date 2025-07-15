@@ -9,17 +9,17 @@ import com.example.recipttracker.ui.login.LoginScreen
 import com.example.recipttracker.ui.signup.SignUpScreen
 import com.example.recipttracker.ui.addEditReceipt.Camera
 import com.example.recipttracker.ui.addEditReceipt.CameraRoll
-import com.example.recipttracker.ui.addEditReceipt.AddEditReceipt
+import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.recipttracker.ui.addEditReceipt.ReceiptToEditOrAdd
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
+import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptUI
 import com.example.recipttracker.ViewModels.UserViewModel
 
 @Composable
 fun AppNavigator() {
     val navController = rememberNavController()
-    val receiptToEditOrAdd: ReceiptToEditOrAdd = viewModel()
     val receiptViewModel: ReceiptViewModel = hiltViewModel()
+    val modifyReceiptVM: ModifyReceiptVM = viewModel()
     val userViewModel: UserViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = "landing") {
@@ -47,30 +47,33 @@ fun AppNavigator() {
             ReceiptListScreen(
                 onCapture = { navController.navigate("camera") },
                 onUpload = { navController.navigate("cameraRoll") },
-                onEdit = { navController.navigate("addEditReceipt") },
+                onEdit = { navController.navigate("modifyReceiptUI") },
+                receiptViewModel = receiptViewModel,
+                modifyReceiptVM = modifyReceiptVM,
                 onLogout = { navController.navigate("landing") },
-                userViewModel = userViewModel,
+                userViewModel = userViewModel
             )
         }
-
         composable("camera") {
             Camera(
-                onFinish = { navController.navigate("addEditReceipt") },
-                receiptToEditOrAdd
+                onFinish = { navController.navigate("modifyReceiptUI") },
+                onFail = { navController.navigate("receipts") },
+                modifyReceiptVM = modifyReceiptVM
             )
         }
         composable("cameraRoll") {
             CameraRoll(
-                onFinish = { navController.navigate("addEditReceipt") },
-                receiptToEditOrAdd
+                onFinish = { navController.navigate("modifyReceiptUI") },
+                onFail = { navController.navigate("receipts") },
+                modifyReceiptVM = modifyReceiptVM
             )
         }
-        composable("addEditReceipt") {
-            AddEditReceipt(
+        composable("modifyReceiptUI") {
+            ModifyReceiptUI(
                 onFinish = { navController.navigate("receipts") },
-                receiptToEditOrAdd,
-                receiptViewModel,
-                userViewModel,
+                modifyReceiptVM = modifyReceiptVM,
+                receiptViewModel = receiptViewModel,
+                userViewModel = userViewModel
             )
         }
     }

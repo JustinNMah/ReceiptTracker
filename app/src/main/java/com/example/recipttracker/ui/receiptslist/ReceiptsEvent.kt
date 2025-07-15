@@ -12,6 +12,7 @@ sealed class ReceiptsEvent {
         val store: String,
         val amount: String,
         val date: String,
-        val category: String
+        val category: String,
+        val uriPath: String
     ): ReceiptsEvent()
 }
