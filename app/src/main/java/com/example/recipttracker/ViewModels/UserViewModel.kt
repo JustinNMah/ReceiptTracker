@@ -15,7 +15,6 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
-
     private val _state = mutableStateOf(UserState())
     val state: State<UserState> = _state
 
@@ -51,10 +50,10 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = UserState(isLoading = true)
             val success = userRepository.registerUser(username, password)
-            _state.value = if (success) {
-                UserState(success = true)
-            } else {
-                UserState(error = "User already exists")
+            if (success){
+                login(username, password)
+            } else{
+                _state.value = UserState(error = "User already exists")
             }
         }
     }
@@ -75,6 +74,7 @@ class UserViewModel @Inject constructor(
             }
         }
     }
+
     private fun logout() {
         viewModelScope.launch {
             _state.value = UserState()

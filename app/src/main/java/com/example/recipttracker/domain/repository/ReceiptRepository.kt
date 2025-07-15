@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.Flow
 
 // Repository for the database
 interface ReceiptRepository {
-    fun getReceipts(): Flow<List<Receipt>>
+    fun getReceipts(userId: Int): Flow<List<Receipt>>
 
-    suspend fun getReceiptById(id: Int) : Receipt?
+    suspend fun getReceiptById(id: Int, userId: Int) : Receipt?
 
     suspend fun insertReceipt(receipt: Receipt)
 

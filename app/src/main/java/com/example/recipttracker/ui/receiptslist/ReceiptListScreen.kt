@@ -18,10 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.recipttracker.ViewModels.UserViewModel
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
 import kotlinx.coroutines.launch
+import android.util.Log
+import com.example.recipttracker.domain.event.UserEvent
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,8 +34,18 @@ fun ReceiptListScreen(
     onUpload: () -> Unit,
     onEdit: () -> Unit,
     onLogout: () -> Unit,
-    viewModel: ReceiptViewModel = hiltViewModel()
+    viewModel: ReceiptViewModel = hiltViewModel(),
+    userViewModel: UserViewModel
 ) {
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { userViewModel.state.value.user }
+            .collectLatest { user ->
+                if (user != null) {
+                    viewModel.setUser(user.id)
+                }
+            }
+    }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -54,7 +68,7 @@ fun ReceiptListScreen(
                     label = { Text("Logout") },
                     selected = false,
                     onClick = {
-                        scope.launch { drawerState.close(); onLogout() }
+                        scope.launch { userViewModel.onEvent(UserEvent.Logout); onLogout(); drawerState.close() }
                     }
                 )
             }
