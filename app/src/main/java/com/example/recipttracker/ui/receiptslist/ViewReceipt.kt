@@ -102,7 +102,7 @@ fun ViewReceipt(
                     val fields: MutableMap<String, String> = mutableMapOf<String, String>()
 //                    fields["Uri Path:"] = modifyReceiptVM.uriPath.value!!
                     fields["Store:"] = modifyReceiptVM.store.value!!
-                    fields["Amount:"] = modifyReceiptVM.amount.value!!
+                    fields["Amount:"] = "$${modifyReceiptVM.amount.value!!}"
                     fields["Date:"] = modifyReceiptVM.date.value!!
                     fields["Category:"] = modifyReceiptVM.category.value!!
 
