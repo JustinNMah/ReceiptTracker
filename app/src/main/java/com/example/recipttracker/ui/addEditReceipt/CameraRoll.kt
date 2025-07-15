@@ -16,7 +16,7 @@ fun CameraRoll(
     modifyReceiptVM: ModifyReceiptVM
 ) {
     val handleClick: (Uri) -> Unit = { uri ->
-        Log.d("TAG", "Uri path for photo: $uri")
+        Log.d("CameraRoll", "Uri path for photo: $uri")
         modifyReceiptVM.setReceiptToAdd(uri.toString())
         onFinish()
     }
@@ -25,7 +25,7 @@ fun CameraRoll(
         if (uri != null) {
             handleClick(uri)
         } else {
-            Log.d("TAG", "Did not choose photo")
+            Log.d("CameraRoll", "Did not choose photo")
             onFail()
         }
     }

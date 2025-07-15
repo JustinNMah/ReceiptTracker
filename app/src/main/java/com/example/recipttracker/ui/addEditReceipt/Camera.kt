@@ -18,7 +18,7 @@ fun Camera(
     modifyReceiptVM: ModifyReceiptVM
 ) {
     val filePath: File = File(LocalContext.current.getFilesDir(), "${System.currentTimeMillis()}")
-    Log.d("TAG", "Creating filePath: $filePath")
+    Log.d("Camera", "Creating filePath: $filePath")
     val uriPath: Uri = FileProvider.getUriForFile(
         LocalContext.current,
         BuildConfig.APPLICATION_ID + ".provider",
@@ -26,10 +26,10 @@ fun Camera(
     )
 
     val diffLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { status ->
-        Log.d("TAG", "$status")
+        Log.d("Camera", "$status")
 
         if (status) {
-            Log.d("TAG", "Stored image into uriPath: $uriPath")
+            Log.d("Camera", "Stored image into uriPath: $uriPath")
             modifyReceiptVM.setReceiptToAdd(uriPath.toString())
             onFinish()
         } else {

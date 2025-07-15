@@ -24,13 +24,13 @@ class ModifyReceiptVM(): ViewModel() {
     private var _uriPath: MutableLiveData<String> = MutableLiveData<String>()
     val uriPath: LiveData<String> = _uriPath
 
-    // this field only applies to adding a receipt (not edit)
-    private var _receiptId: MutableLiveData<Int> = MutableLiveData<Int>()
-    val receiptId: LiveData<Int> = _receiptId
+    // this field does not apply for adding a receipt
+    private var _receiptToEdit: MutableLiveData<Receipt> = MutableLiveData<Receipt>()
+    val receiptToEdit: LiveData<Receipt> = _receiptToEdit
 
     fun setReceiptToEdit(receiptToEdit: Receipt) {
         _mode.value = Mode.EDIT
-        _receiptId.value = receiptToEdit.id!! // receiptToEdit.id should not be null as it is a primary key?
+        _receiptToEdit.value = receiptToEdit
         _store.value = receiptToEdit.store
         _amount.value = receiptToEdit.amount
         _date.value = receiptToEdit.date
