@@ -1,12 +1,6 @@
 package com.example.recipttracker.navigation
 
-import android.net.Uri
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.*
 import com.example.recipttracker.ui.launch.LandingScreen
@@ -28,7 +22,7 @@ fun AppNavigator() {
     val modifyReceiptVM: ModifyReceiptVM = viewModel()
     val userViewModel: UserViewModel = hiltViewModel()
 
-    NavHost(navController = navController, startDestination = "receipts") {
+    NavHost(navController = navController, startDestination = "landing") {
         composable("landing") {
             LandingScreen(
                 onLogin = { navController.navigate("login") },
