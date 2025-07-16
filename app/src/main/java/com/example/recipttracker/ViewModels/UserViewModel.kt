@@ -23,6 +23,7 @@ class UserViewModel @Inject constructor(
             is UserEvent.Logout -> logout()
             is UserEvent.Login -> login(event.username, event.password)
             is UserEvent.SignUp -> signUp(event.username, event.password, event.confirmPassword)
+            is UserEvent.ClearError -> clearError()
         }
     }
 
@@ -79,5 +80,9 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = UserState()
         }
+    }
+
+    private fun clearError() {
+        _state.value = _state.value.copy(error = null)
     }
 }
