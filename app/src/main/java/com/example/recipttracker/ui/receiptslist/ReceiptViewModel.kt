@@ -60,7 +60,7 @@ class ReceiptViewModel @Inject constructor(
                         event.amount,
                         event.date,
                         event.category,
-                        event.uriPath
+                        event.filePath
                     )
                 }
             }

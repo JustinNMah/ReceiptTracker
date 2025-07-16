@@ -28,7 +28,7 @@ interface ReceiptDao {
     suspend fun getReceiptById(id: Int, userId: Int): Receipt?
 
     @Query(
-        "UPDATE receipt SET store = :store, amount = :amount, date = :date, category = :category, uriPath = :uriPath WHERE id = :id"
+        "UPDATE receipt SET store = :store, amount = :amount, date = :date, category = :category, filePath = :filePath WHERE id = :id"
     )
-    suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String, uriPath: String): Int
+    suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String, filePath: String): Int
 }

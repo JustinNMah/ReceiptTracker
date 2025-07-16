@@ -13,6 +13,6 @@ sealed class ReceiptsEvent {
         val amount: String,
         val date: String,
         val category: String,
-        val uriPath: String
+        val filePath: String
     ): ReceiptsEvent()
 }

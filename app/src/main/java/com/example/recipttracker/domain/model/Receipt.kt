@@ -16,7 +16,7 @@ data class Receipt(
     val amount: String,
     val date: String, // format as: yyyy-MM-dd
     val category: String,
-    val uriPath: String
+    val filePath: String
 ) {
     // get month from dates
     val monthYear: String

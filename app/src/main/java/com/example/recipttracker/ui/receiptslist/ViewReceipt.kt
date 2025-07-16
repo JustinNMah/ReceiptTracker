@@ -21,11 +21,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -34,6 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
+import java.io.File
+import androidx.compose.runtime.getValue
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +44,9 @@ fun ViewReceipt(
     receiptViewModel: ReceiptViewModel,
     modifyReceiptVM: ModifyReceiptVM
 ) {
+
+    val filePath: String = modifyReceiptVM.filePath.value!!
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -77,10 +81,8 @@ fun ViewReceipt(
             modifier = Modifier.padding(paddingValues).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            val imgUri: Uri = Uri.parse(modifyReceiptVM.uriPath.value)
-            val inputStream = LocalContext.current.contentResolver.openInputStream(imgUri)
-            val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
+            val file = File(filePath)
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
 
             bitmap?.let {
                 Image(
@@ -100,11 +102,11 @@ fun ViewReceipt(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     val fields: MutableMap<String, String> = mutableMapOf<String, String>()
-//                    fields["Uri Path:"] = modifyReceiptVM.uriPath.value!!
                     fields["Store:"] = modifyReceiptVM.store.value!!
                     fields["Amount:"] = modifyReceiptVM.amount.value!!
                     fields["Date:"] = modifyReceiptVM.date.value!!
                     fields["Category:"] = modifyReceiptVM.category.value!!
+//                    fields["File Path:"] = modifyReceiptVM.filePath.value!!
 
                     for (fieldKey in fields.keys) {
                         val topPadding = if (fieldKey == "Store:") 40 else 5

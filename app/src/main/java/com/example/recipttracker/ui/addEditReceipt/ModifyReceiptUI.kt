@@ -42,6 +42,7 @@ import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptsEvent
 import com.example.recipttracker.ViewModels.UserViewModel
+import java.io.File
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,11 +61,10 @@ fun ModifyReceiptUI(
     val amount: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.amount.value!!) }
     val date: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.date.value!!) }
     val category: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.category.value!!) }
-    val uriPath: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.uriPath.value!!) }
+    val filePath: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.filePath.value!!) }
 
-    val imgUri: Uri = Uri.parse(uriPath.value)
-    val inputStream = LocalContext.current.contentResolver.openInputStream(imgUri)
-    val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
+    val file = File(filePath.value)
+    val bitmap = BitmapFactory.decodeFile(file.absolutePath)
 
     Scaffold(
         topBar = {
@@ -156,7 +156,7 @@ fun ModifyReceiptUI(
                                         amount.value,
                                         date.value,
                                         category.value,
-                                        uriPath.value
+                                        filePath.value
                                     ))
                                 } ?: run {
                                     Log.e("ModifyReceiptUI", "Cannot edit receipt: user is not logged in.")
@@ -170,7 +170,7 @@ fun ModifyReceiptUI(
                                         amount = amount.value,
                                         date = date.value,
                                         category = category.value,
-                                        uriPath = uriPath.value
+                                        filePath = filePath.value
                                     )
                                     receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
                                 } ?: run {
