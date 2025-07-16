@@ -113,4 +113,20 @@ class ReceiptViewModel @Inject constructor(
             receiptSortOrder = receiptSortOrder
         )
     }
+
+    fun searchReceipts(userId: Int, query: String) {
+        getReceiptsCoroutine?.cancel()
+
+        if (query.isBlank()) {
+            getReceipts(_state.value.receiptSortOrder)
+            return
+        }
+
+        getReceiptsCoroutine = repository.searchReceipts(userId, query)
+            .onEach { receipts ->
+                sortReceipts(receipts, _state.value.receiptSortOrder)
+            }
+            .launchIn(viewModelScope)
+    }
+
 }
