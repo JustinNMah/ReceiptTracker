@@ -1,13 +1,16 @@
 package com.example.recipttracker.ui.addEditReceipt
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import android.util.Log
 import androidx.activity.result.PickVisualMediaRequest
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalContext
+import java.io.File
 
 @Composable
 fun CameraRoll(
@@ -15,9 +18,23 @@ fun CameraRoll(
     onFail: () -> Unit,
     modifyReceiptVM: ModifyReceiptVM
 ) {
-    val handleClick: (Uri) -> Unit = { uri ->
-        Log.d("CameraRoll", "Uri path for photo: $uri")
-        modifyReceiptVM.setReceiptToAdd(uri.toString())
+    val localContext = LocalContext.current
+
+    val handleClick: (Uri) -> Unit = { imgUri ->
+        Log.d("CameraRoll", "Uri path for photo: $imgUri")
+
+        val inputStream = localContext.contentResolver.openInputStream(imgUri)
+        val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream)
+
+        val file: File = File(localContext.getFilesDir(), "${System.currentTimeMillis()}")
+
+        file.outputStream().use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+        }
+
+        Log.d("CameraRoll", "Saved image to ${file.absolutePath}")
+
+        modifyReceiptVM.setReceiptToAdd(file.absolutePath)
         onFinish()
     }
 

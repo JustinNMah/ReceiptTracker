@@ -1,5 +1,6 @@
 package com.example.recipttracker.ui.addEditReceipt
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,8 +22,8 @@ class ModifyReceiptVM(): ViewModel() {
     private var _category: MutableLiveData<String> = MutableLiveData<String>()
     val category: LiveData<String> = _category
 
-    private var _uriPath: MutableLiveData<String> = MutableLiveData<String>()
-    val uriPath: LiveData<String> = _uriPath
+    private var _filePath: MutableLiveData<String> = MutableLiveData<String>()
+    val filePath: LiveData<String> = _filePath
 
     // this field does not apply for adding a receipt
     private var _receiptToEdit: MutableLiveData<Receipt> = MutableLiveData<Receipt>()
@@ -35,15 +36,15 @@ class ModifyReceiptVM(): ViewModel() {
         _amount.value = receiptToEdit.amount
         _date.value = receiptToEdit.date
         _category.value = receiptToEdit.category
-        _uriPath.value = receiptToEdit.uriPath
+        _filePath.value = receiptToEdit.filePath
     }
 
-    fun setReceiptToAdd(uriPath: String) {
+    fun setReceiptToAdd(filePath: String) {
         _mode.value = Mode.ADD
         _store.value = ""
         _amount.value = ""
         _date.value = ""
         _category.value = ""
-        _uriPath.value = uriPath
+        _filePath.value = filePath
     }
 }
