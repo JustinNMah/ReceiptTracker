@@ -53,7 +53,10 @@ fun LoginScreen(
             horizontalAlignment = Alignment.Start
         ) {
             IconButton(
-                onClick = onBack,
+                onClick = {
+                    userViewModel.onEvent(UserEvent.ClearError)
+                    onBack()
+                },
                 modifier = Modifier.align(Alignment.Start)
             ) {
                 Icon(
