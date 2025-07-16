@@ -12,4 +12,6 @@ interface ReceiptRepository {
     suspend fun insertReceipt(receipt: Receipt)
 
     suspend fun deleteReceipt(receipt: Receipt)
+
+    suspend fun getUnsyncedReceipts() : List<Receipt>
 }

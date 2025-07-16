@@ -87,4 +87,7 @@ dependencies {
     // Firebase Firestore
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.10.2")
 }

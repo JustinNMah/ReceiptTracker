@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 interface ReceiptDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertReceipt(receipt: Receipt)
+    suspend fun insertReceipt(receipt: Receipt): Long // Returns receipt id
 
     @Update
     suspend fun updateReceipt(receipt: Receipt) // TODO: Consider removing this? Cause insertReceipt has conflict strategy of replace
@@ -27,4 +27,6 @@ interface ReceiptDao {
     @Query("SELECT * FROM receipt WHERE id = :id")
     fun getReceiptById(id: Int): Receipt?
 
+    @Query("SELECT * FROM receipt WHERE syncedWithCloud = 0")
+    suspend fun getUnsyncedReceipts(): List<Receipt>
 }
