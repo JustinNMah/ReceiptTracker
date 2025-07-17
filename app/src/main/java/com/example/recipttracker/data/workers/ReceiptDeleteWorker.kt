@@ -6,6 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.firestore.FirebaseFirestore
 
+// needed this worker function so made a new folder and file
 class ReceiptDeleteWorker(
     appContext: Context,
     workerParams: WorkerParameters
