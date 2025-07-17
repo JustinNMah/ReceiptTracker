@@ -12,7 +12,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.recipttracker.domain.util.ReceiptSyncWorker
-import com.example.recipttracker.data.workers.ReceiptDeleteWorker
+import com.example.recipttracker.data.workers.ReceiptDeleteWorker //links to new /workers folder
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.concurrent.TimeUnit
 
