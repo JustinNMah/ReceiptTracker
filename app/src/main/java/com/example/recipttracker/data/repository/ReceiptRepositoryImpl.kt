@@ -14,7 +14,6 @@ import androidx.work.WorkManager
 import com.example.recipttracker.domain.util.ReceiptSyncWorker
 import com.google.firebase.firestore.FirebaseFirestore
 
-
 class ReceiptRepositoryImpl(
     private val dao: ReceiptDao,
     private val appContext: Context,
@@ -30,9 +29,7 @@ class ReceiptRepositoryImpl(
     }
 
     override suspend fun insertReceipt(receipt: Receipt) {
-        val receiptId = dao.insertReceipt(receipt.copy(syncedWithCloud = false))
-        val updatedReceipt = receipt.copy(id = receiptId.toInt())
-        dao.updateReceipt(updatedReceipt)
+        dao.insertReceipt(receipt.copy(syncedWithCloud = false))
 
         enqueueWifiSync(context = appContext)
     }
