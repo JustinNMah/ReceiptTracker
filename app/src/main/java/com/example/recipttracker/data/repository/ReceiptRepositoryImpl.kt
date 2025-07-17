@@ -55,7 +55,7 @@ class ReceiptRepositoryImpl(
         return dao.getUnsyncedReceipts()
     }
 
-    //remove this comment once cloned to tanjeemh/cloud-offline-sync
+    //remove this comment once sathurja branch cloned to tanjeemh/cloud-offline-sync
     fun enqueueWifiSync(context: Context) {
         val syncRequest = OneTimeWorkRequestBuilder<ReceiptSyncWorker>()
             .setConstraints(
