@@ -38,4 +38,9 @@ class ReceiptRepositoryImpl(
         val numberOfRowsAffected: Int = dao.modifyReceipt(id, store, amount, date, category, filePath)
         Log.d("TAG", "Number of rows modified: $numberOfRowsAffected")
     }
+
+    override fun searchReceipts(userId: Int, query: String): Flow<List<Receipt>> {
+        return dao.searchReceipts(userId, query)
+    }
+
 }

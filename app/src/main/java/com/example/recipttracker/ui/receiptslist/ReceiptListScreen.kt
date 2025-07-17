@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
@@ -25,13 +25,14 @@ import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
 import com.example.recipttracker.ViewModels.UserViewModel
 import kotlinx.coroutines.launch
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import com.example.recipttracker.domain.event.UserEvent
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,11 +54,26 @@ fun ReceiptListScreen(
             }
     }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var searchQuery by remember { mutableStateOf("") }
+    val userId = userViewModel.state.value.user?.id
+
+    LaunchedEffect(userId) {
+        snapshotFlow { searchQuery }
+            .debounce(300)
+            .distinctUntilChanged()
+            .collectLatest { query ->
+                userId?.let {
+                    receiptViewModel.searchReceipts(it, query)
+                }
+            }
+    }
+
     val scope = rememberCoroutineScope()
 
     val state = receiptViewModel.state.value
     val sortState = state.receiptSortOrder
     val receipts = state.receipts
+
     var showFabMenu by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
@@ -94,8 +110,39 @@ fun ReceiptListScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = { /* handle search click */ }) {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
+                        var isSearching by remember { mutableStateOf(false) }
+
+                        if (isSearching) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                TextField(
+                                    value = searchQuery,
+                                    onValueChange = { searchQuery = it },
+                                    singleLine = true,
+                                    placeholder = { Text("Search...") },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 8.dp),
+                                    textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface)
+                                )
+                                IconButton(
+                                    onClick = {
+                                        searchQuery = ""
+                                        isSearching = false
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Clear Search"
+                                    )
+                                }
+                            }
+                        } else {
+                            IconButton(onClick = { isSearching = true }) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
                         }
                     }
                 )

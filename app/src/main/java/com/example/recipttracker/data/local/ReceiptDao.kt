@@ -31,4 +31,14 @@ interface ReceiptDao {
         "UPDATE receipt SET store = :store, amount = :amount, date = :date, category = :category, filePath = :filePath WHERE id = :id"
     )
     suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String, filePath: String): Int
+
+    @Query("""
+        SELECT * FROM receipt 
+        WHERE userId = :userId AND (
+            store LIKE '%' || :query || '%' OR
+            category LIKE '%' || :query || '%' OR
+            date LIKE '%' || :query || '%'
+        )
+    """)
+    fun searchReceipts(userId: Int, query: String): Flow<List<Receipt>>
 }

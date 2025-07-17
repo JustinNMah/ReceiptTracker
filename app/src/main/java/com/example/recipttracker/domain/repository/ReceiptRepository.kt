@@ -14,4 +14,6 @@ interface ReceiptRepository {
     suspend fun deleteReceipt(receipt: Receipt)
 
     suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String, filePath: String)
+
+    fun searchReceipts(userId: Int, query: String): Flow<List<Receipt>>
 }
