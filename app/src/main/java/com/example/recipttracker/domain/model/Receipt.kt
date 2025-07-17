@@ -10,11 +10,12 @@ import java.util.Locale
 @Entity
 data class Receipt(
     @PrimaryKey(autoGenerate = true) val id: Int? = null,
+    val userId: Int, // Maps to the userId
     val store: String,
     val amount: String,
     val date: String, // format as: yyyy-MM-dd
     val category: String,
-    val userId: String = "User1",
+    val filePath: String,
     val syncedWithCloud: Boolean = false,
 ) {
     // get month from dates

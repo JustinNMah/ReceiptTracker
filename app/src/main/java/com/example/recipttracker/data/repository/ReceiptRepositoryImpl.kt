@@ -1,11 +1,11 @@
 package com.example.recipttracker.data.repository
 
 import android.content.Context
+import android.util.Log
 import com.example.recipttracker.data.local.ReceiptDao
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.repository.ReceiptRepository
 import kotlinx.coroutines.flow.Flow
-import android.util.Log
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -21,16 +21,12 @@ class ReceiptRepositoryImpl(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ): ReceiptRepository {
 
-    override fun getReceipts(): Flow<List<Receipt>> {
-        return dao.getReceipts()
+    override fun getReceipts(userId: Int): Flow<List<Receipt>> {
+        return dao.getReceipts(userId)
     }
 
-    override suspend fun getReceiptById(id: Int): Receipt? {
-        return dao.getReceiptById(id)
-    }
-
-    override suspend fun getUnsyncedReceipts(): List<Receipt> {
-        return dao.getUnsyncedReceipts()
+    override suspend fun getReceiptById(id: Int, userId: Int): Receipt? {
+        return dao.getReceiptById(id, userId)
     }
 
     override suspend fun insertReceipt(receipt: Receipt) {
@@ -46,7 +42,7 @@ class ReceiptRepositoryImpl(
 
         // deletes from firestore
         firestore.collection("users")
-            .document(receipt.userId)
+            .document(receipt.userId.toString())
             .collection("receipts")
             .document(receipt.id.toString())
             .delete()
@@ -56,6 +52,10 @@ class ReceiptRepositoryImpl(
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error deleting from Firestore", e)
             }
+    }
+
+    override suspend fun getUnsyncedReceipts(): List<Receipt> {
+        return dao.getUnsyncedReceipts()
     }
 
     fun enqueueWifiSync(context: Context) {
@@ -72,5 +72,18 @@ class ReceiptRepositoryImpl(
             .build()
 
         WorkManager.getInstance(context).enqueue(syncRequest)
+    }
+
+    override suspend fun modifyReceipt(
+        id: Int,
+        store: String,
+        amount: String,
+        date: String,
+        category: String,
+        filePath: String
+    ) {
+        Log.d("TAG", "Modifying receipt in ReceiptRepositoryImpl")
+        val numberOfRowsAffected: Int = dao.modifyReceipt(id, store, amount, date, category, filePath)
+        Log.d("TAG", "Number of rows modified: $numberOfRowsAffected")
     }
 }

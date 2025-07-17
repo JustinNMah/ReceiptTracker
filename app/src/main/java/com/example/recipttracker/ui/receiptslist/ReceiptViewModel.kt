@@ -1,5 +1,6 @@
 package com.example.recipttracker.ui.receiptslist
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -21,17 +22,27 @@ class ReceiptViewModel @Inject constructor(
     private val repository: ReceiptRepository
 ): ViewModel() {
 
-    private val _state = mutableStateOf (ReceiptsListState())
+    private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
 
     private var getReceiptsCoroutine: Job? = null
-
+    private var userId: Int? = null
     init {
+        getReceipts(_state.value.receiptSortOrder)
+    }
+
+    fun setUser(userId: Int) {
+        this.userId = userId
         getReceipts(_state.value.receiptSortOrder)
     }
 
     fun onEvent(event: ReceiptsEvent) { // create an event when user changes Sort Order or Deletes Receipt.
         when(event) {
+            is ReceiptsEvent.AddReceipt -> {
+                viewModelScope.launch {
+                    repository.insertReceipt(event.receipt)
+                }
+            }
             is ReceiptsEvent.Order -> {
                 val allReceipts = _state.value.receipts.values.flatten()
                 sortReceipts(allReceipts, event.receiptSortOrder)
@@ -41,14 +52,31 @@ class ReceiptViewModel @Inject constructor(
                     repository.deleteReceipt(event.receipt)
                 }
             }
+            is ReceiptsEvent.ModifyReceipt -> {
+                viewModelScope.launch {
+                    repository.modifyReceipt(
+                        event.id,
+                        event.store,
+                        event.amount,
+                        event.date,
+                        event.category,
+                        event.filePath
+                    )
+                }
+            }
         }
     }
 
     private fun getReceipts(receiptSortOrder: ReceiptSortOrder) {
+        val uid = userId ?: run {
+            Log.e("ReceiptViewModel", "getReceipts: userId is null, aborting fetch")
+            return
+        }
+
         getReceiptsCoroutine?.cancel()
         println("In getReceipts")
 
-        getReceiptsCoroutine = repository.getReceipts()
+        getReceiptsCoroutine = repository.getReceipts(uid)
             .onEach { receipts ->
                 sortReceipts(receipts, receiptSortOrder)
             }

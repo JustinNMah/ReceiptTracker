@@ -25,7 +25,7 @@ class ReceiptSyncWorker(
             unsynced.forEach { receipt ->
                 firestore
                     .collection("users")
-                    .document(receipt.userId)
+                    .document(receipt.userId.toString())
                     .collection("receipts")
                     .document(receipt.id.toString())
                     .set(receipt)

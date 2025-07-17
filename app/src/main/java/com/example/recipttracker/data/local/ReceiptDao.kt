@@ -21,11 +21,16 @@ interface ReceiptDao {
     @Delete
     suspend fun deleteReceipt(receipt: Receipt) // TODO: Maybe change to deleteReceiptById
 
-    @Query("SELECT * FROM receipt")
-    fun getReceipts(): Flow<List<Receipt>>
+    @Query("SELECT * FROM receipt WHERE userId = :userId")
+    fun getReceipts(userId: Int): Flow<List<Receipt>>
 
-    @Query("SELECT * FROM receipt WHERE id = :id")
-    fun getReceiptById(id: Int): Receipt?
+    @Query("SELECT * FROM receipt WHERE id = :id AND userId = :userId")
+    suspend fun getReceiptById(id: Int, userId: Int): Receipt?
+
+    @Query(
+        "UPDATE receipt SET store = :store, amount = :amount, date = :date, category = :category, filePath = :filePath WHERE id = :id"
+    )
+    suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String, filePath: String): Int
 
     @Query("SELECT * FROM receipt WHERE syncedWithCloud = 0")
     suspend fun getUnsyncedReceipts(): List<Receipt>
