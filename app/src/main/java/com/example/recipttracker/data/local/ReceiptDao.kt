@@ -19,7 +19,7 @@ interface ReceiptDao {
     suspend fun updateReceipt(receipt: Receipt) // TODO: Consider removing this? Cause insertReceipt has conflict strategy of replace
 
     @Delete
-    suspend fun deleteReceipt(receipt: Receipt) // TODO: Maybe change to deleteReceiptById
+    suspend fun deleteReceipt(receipt: Receipt) // TODO: Maybe change to deleteReceiptById // added the deleteReceipt functionality, maybe this is no longer needed?
 
     @Query("SELECT * FROM receipt WHERE userId = :userId")
     fun getReceipts(userId: Int): Flow<List<Receipt>>
