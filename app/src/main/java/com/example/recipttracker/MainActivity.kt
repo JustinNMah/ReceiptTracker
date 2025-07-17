@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
 
         FirebaseApp.initializeApp(this)
 
-        //Call test function
+        //Call test function - only for testing
         testAddReceipt()
 
         setContent {
