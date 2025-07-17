@@ -12,64 +12,54 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.recipttracker.domain.util.ReceiptSyncWorker
+import com.example.recipttracker.data.workers.ReceiptDeleteWorker
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.concurrent.TimeUnit
 
 class ReceiptRepositoryImpl(
     private val dao: ReceiptDao,
-    private val appContext: Context,
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
-): ReceiptRepository {
+    private val db: FirebaseFirestore,
+    private val context: Context
+) : ReceiptRepository {
 
     override fun getReceipts(userId: Int): Flow<List<Receipt>> {
         return dao.getReceipts(userId)
     }
 
-    override suspend fun getReceiptById(id: Int, userId: Int): Receipt? {
-        return dao.getReceiptById(id, userId)
-    }
-
     override suspend fun insertReceipt(receipt: Receipt) {
-        dao.insertReceipt(receipt.copy(syncedWithCloud = false))
+        dao.insertReceipt(receipt)
 
-        enqueueWifiSync(context = appContext)
+        try {
+            db.collection("receipts").document(receipt.id.toString()).set(receipt)
+                .addOnSuccessListener {
+                    Log.d("Firestore", "Receipt successfully written!")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firestore", "Error writing receipt", e)
+                    scheduleSync()
+                }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Exception during insert: ${e.message}")
+            scheduleSync()
+        }
     }
 
     override suspend fun deleteReceipt(receipt: Receipt) {
         dao.deleteReceipt(receipt)
 
-        // deletes from firestore
-        firestore.collection("users")
-            .document(receipt.userId.toString())
-            .collection("receipts")
-            .document(receipt.id.toString())
-            .delete()
-            .addOnSuccessListener {
-                Log.d("Firestore", "Receipt deleted from Firestore")
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Error deleting from Firestore", e)
-            }
-    }
-
-    override suspend fun getUnsyncedReceipts(): List<Receipt> {
-        return dao.getUnsyncedReceipts()
-    }
-
-    //remove this comment once sathurja branch cloned to tanjeemh/cloud-offline-sync
-    fun enqueueWifiSync(context: Context) {
-        val syncRequest = OneTimeWorkRequestBuilder<ReceiptSyncWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.UNMETERED) // Wifi only not data
-                    .build()
-            )
-            .setBackoffCriteria(
-                BackoffPolicy.EXPONENTIAL,
-                10, java.util.concurrent.TimeUnit.SECONDS
-            )
-            .build()
-
-        WorkManager.getInstance(context).enqueue(syncRequest)
+        try {
+            db.collection("receipts").document(receipt.id.toString()).delete()
+                .addOnSuccessListener {
+                    Log.d("Firestore", "Receipt successfully deleted!")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firestore", "Error deleting receipt", e)
+                    scheduleDelete(receipt.id.toString())
+                }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Exception during delete: ${e.message}")
+            scheduleDelete(receipt.id.toString())
+        }
     }
 
     override suspend fun modifyReceipt(
@@ -80,8 +70,44 @@ class ReceiptRepositoryImpl(
         category: String,
         filePath: String
     ) {
-        Log.d("TAG", "Modifying receipt in ReceiptRepositoryImpl")
-        val numberOfRowsAffected: Int = dao.modifyReceipt(id, store, amount, date, category, filePath)
-        Log.d("TAG", "Number of rows modified: $numberOfRowsAffected")
+        dao.modifyReceipt(id, store, amount, date, category, filePath)
+    }
+
+
+    override suspend fun getReceiptById(id: Int, userId: Int): Receipt? {
+        return dao.getReceiptById(id, userId)
+    }
+
+    override suspend fun getUnsyncedReceipts(): List<Receipt> {
+        return dao.getUnsyncedReceipts()
+    }
+
+
+
+    private fun scheduleSync() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val request = OneTimeWorkRequestBuilder<ReceiptSyncWorker>()
+            .setConstraints(constraints)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
+            .build()
+
+        WorkManager.getInstance(context).enqueue(request)
+    }
+
+    private fun scheduleDelete(receiptId: String) {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val request = OneTimeWorkRequestBuilder<ReceiptDeleteWorker>()
+            .setConstraints(constraints)
+            .setInputData(androidx.work.Data.Builder().putString("receiptId", receiptId).build())
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
+            .build()
+
+        WorkManager.getInstance(context).enqueue(request)
     }
 }
