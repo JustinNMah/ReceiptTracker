@@ -37,42 +37,46 @@ fun CaptureScreen() {
     ) {
         Spacer(modifier = Modifier.height(50.dp))
 
-        Image(
-            painter = painterResource(id = R.drawable.sample_receipt),
-            contentDescription = "Sample Receipt",
-            modifier = Modifier.size(200.dp)
-        )
+        if (recognizedText == null) {
+            Image(
+                painter = painterResource(id = R.drawable.costco_receipt),
+                contentDescription = "Sample Receipt",
+                modifier = Modifier.size(500.dp)
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
-            onClick = {
-                scope.launch {
-                    try {
-                        val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.sample_receipt)
-                        val stream = ByteArrayOutputStream()
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                        val imageData = stream.toByteArray()
+            Button(
+                onClick = {
+                    scope.launch {
+                        try {
+                            val bitmap = BitmapFactory.decodeResource(
+                                context.resources,
+                                R.drawable.costco_receipt
+                            )
+                            val stream = ByteArrayOutputStream()
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                            val imageData = stream.toByteArray()
 
-                        val result = repository.recognizeTextFromImage(imageData)
-                        recognizedText = result
-                    } catch (e: Exception) {
-                        recognizedText = "Error: ${e.localizedMessage}"
+                            val result = repository.recognizeTextFromImage(imageData)
+                            recognizedText = result.joinToString("\n")
+                        } catch (e: Exception) {
+                            recognizedText = "Error: ${e.localizedMessage}"
+                        }
                     }
-                }
+                },
+                modifier = Modifier.width(185.dp)
+            ) {
+                Text("Process Receipt")
             }
-            ,
-            modifier = Modifier.width(185.dp)
-        ) {
-            Text("Process Receipt")
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         recognizedText?.let {
             Text(
                 text = it,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }

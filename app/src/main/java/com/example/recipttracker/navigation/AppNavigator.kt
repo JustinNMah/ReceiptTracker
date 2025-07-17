@@ -12,7 +12,7 @@ import com.example.recipttracker.ui.signup.SignUpScreen
 fun AppNavigator() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "landing") {
+    NavHost(navController = navController, startDestination = "capture") {
         composable("landing") {
             LandingScreen(
                 onLogin = { navController.navigate("login") },
@@ -30,9 +30,7 @@ fun AppNavigator() {
             )
         }
         composable("receipts") {
-            ReceiptListScreen(
-                onCapture = { navController.navigate("capture")}
-            )
+            ReceiptListScreen()
         }
         composable("capture") {
             CaptureScreen()
