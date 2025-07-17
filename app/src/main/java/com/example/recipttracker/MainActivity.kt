@@ -1,4 +1,4 @@
-package com.example.recipttracker.ui
+package com.example.recipttracker
 
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
 
         FirebaseApp.initializeApp(this)
 
-        // Call test function
+        //Call test function
         testAddReceipt()
 
         setContent {
@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun testAddReceipt() {
+        println("In testAddReceipt")
         val db = FirebaseFirestore.getInstance()
 
         // Sample receipt data
