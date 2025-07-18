@@ -30,8 +30,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideReceiptRepository(db: ReceiptDatabase): ReceiptRepository {
-        return ReceiptRepositoryImpl(db.receiptDao)
+    fun provideReceiptRepository(db: ReceiptDatabase, app: Application): ReceiptRepository {
+        return ReceiptRepositoryImpl(db.receiptDao, app.applicationContext)
     }
 
     @Provides

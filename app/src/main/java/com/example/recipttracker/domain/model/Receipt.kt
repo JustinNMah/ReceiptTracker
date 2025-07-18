@@ -1,6 +1,5 @@
 package com.example.recipttracker.domain.model
 
-import android.graphics.Bitmap
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.text.SimpleDateFormat
@@ -10,13 +9,14 @@ import java.util.Locale
 
 @Entity
 data class Receipt(
-    @PrimaryKey val id: Int? = null,
+    @PrimaryKey(autoGenerate = true) val id: Int? = null,
     val userId: Int, // Maps to the userId
     val store: String,
     val amount: String,
     val date: String, // format as: yyyy-MM-dd
     val category: String,
-    val filePath: String
+    val filePath: String,
+    val syncedWithCloud: Boolean = false,
 ) {
     // get month from dates
     val monthYear: String

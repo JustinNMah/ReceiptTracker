@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import com.example.recipttracker.domain.event.UserEvent
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
