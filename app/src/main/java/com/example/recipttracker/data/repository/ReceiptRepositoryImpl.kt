@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit
 
 class ReceiptRepositoryImpl(
     private val dao: ReceiptDao,
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val context: Context
+    private val context: Context,
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : ReceiptRepository {
 
     override fun getReceipts(userId: Int): Flow<List<Receipt>> {
