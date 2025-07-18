@@ -4,9 +4,10 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import androidx.work.Data
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
-// needed this worker function so made a new folder and file
 class ReceiptDeleteWorker(
     appContext: Context,
     workerParams: WorkerParameters
@@ -14,25 +15,26 @@ class ReceiptDeleteWorker(
 
     override suspend fun doWork(): Result {
         val receiptId = inputData.getString("receiptId")
-        if (receiptId == null) {
-            Log.e("ReceiptDeleteWorker", "Missing receiptId in input data")
+        val userId = inputData.getString("userId")
+
+        if (receiptId.isNullOrEmpty() || userId.isNullOrEmpty()) {
+            Log.e("ReceiptDeleteWorker", "Missing receiptId or userId in input data")
             return Result.failure()
         }
 
         return try {
             val db = FirebaseFirestore.getInstance()
-            db.collection("receipts").document(receiptId)
+            db.collection("users")
+                .document(userId)
+                .collection("receipts")
+                .document(receiptId)
                 .delete()
-                .addOnSuccessListener {
-                    Log.d("ReceiptDeleteWorker", "Successfully deleted receipt: $receiptId")
-                }
-                .addOnFailureListener { e ->
-                    Log.e("ReceiptDeleteWorker", "Failed to delete receipt: $receiptId", e)
-                }
+                .await()
 
+            Log.d("ReceiptDeleteWorker", "Successfully deleted receipt $receiptId for user $userId")
             Result.success()
         } catch (e: Exception) {
-            Log.e("ReceiptDeleteWorker", "Exception deleting receipt", e)
+            Log.e("ReceiptDeleteWorker", "Failed to delete receipt $receiptId for user $userId", e)
             Result.retry()
         }
     }

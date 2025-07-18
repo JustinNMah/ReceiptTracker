@@ -62,11 +62,11 @@ class ReceiptRepositoryImpl(
                 }
                 .addOnFailureListener { e ->
                     Log.e("Firestore", "Error deleting receipt", e)
-                    scheduleDelete(receipt.id.toString())
+                    scheduleDelete(receipt.id.toString(), receipt.userId.toString())
                 }
         } catch (e: Exception) {
             Log.e("Firestore", "Exception during delete: ${e.message}")
-            scheduleDelete(receipt.id.toString())
+            scheduleDelete(receipt.id.toString(), receipt.userId.toString())
         }
     }
 
@@ -105,17 +105,23 @@ class ReceiptRepositoryImpl(
         WorkManager.getInstance(context).enqueue(request)
     }
 
-    private fun scheduleDelete(receiptId: String) {
+    private fun scheduleDelete(receiptId: String, userId: String) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
         val request = OneTimeWorkRequestBuilder<ReceiptDeleteWorker>()
             .setConstraints(constraints)
-            .setInputData(androidx.work.Data.Builder().putString("receiptId", receiptId).build())
+            .setInputData(
+                androidx.work.Data.Builder()
+                    .putString("receiptId", receiptId)
+                    .putString("userId", userId)
+                    .build()
+            )
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
             .build()
 
         WorkManager.getInstance(context).enqueue(request)
     }
+
 }
