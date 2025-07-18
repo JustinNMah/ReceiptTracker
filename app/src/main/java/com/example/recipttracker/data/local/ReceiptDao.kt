@@ -32,6 +32,16 @@ interface ReceiptDao {
     )
     suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String, filePath: String): Int
 
+    @Query("""
+        SELECT * FROM receipt 
+        WHERE userId = :userId AND (
+            store LIKE '%' || :query || '%' OR
+            category LIKE '%' || :query || '%' OR
+            date LIKE '%' || :query || '%'
+        )
+    """)
+    fun searchReceipts(userId: Int, query: String): Flow<List<Receipt>>
+
     @Query("SELECT * FROM receipt WHERE syncedWithCloud = 0")
     suspend fun getUnsyncedReceipts(): List<Receipt>
 }
