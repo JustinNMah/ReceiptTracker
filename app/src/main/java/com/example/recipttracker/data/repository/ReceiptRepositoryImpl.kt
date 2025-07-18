@@ -30,7 +30,11 @@ class ReceiptRepositoryImpl(
         dao.insertReceipt(receipt)
 
         try {
-            db.collection("receipts").document(receipt.id.toString()).set(receipt)
+            db.collection("users")
+                .document(receipt.userId.toString())
+                .collection("receipts")
+                .document(receipt.id.toString())
+                .set(receipt)
                 .addOnSuccessListener {
                     Log.d("Firestore", "Receipt successfully written!")
                 }
