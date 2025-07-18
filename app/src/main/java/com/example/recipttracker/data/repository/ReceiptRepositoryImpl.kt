@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 
 class ReceiptRepositoryImpl(
     private val dao: ReceiptDao,
-    private val db: FirebaseFirestore,
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val context: Context
 ) : ReceiptRepository {
 
