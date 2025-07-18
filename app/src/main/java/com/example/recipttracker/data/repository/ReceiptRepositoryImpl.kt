@@ -52,7 +52,11 @@ class ReceiptRepositoryImpl(
         dao.deleteReceipt(receipt)
 
         try {
-            db.collection("receipts").document(receipt.id.toString()).delete()
+            db.collection("users")
+                .document(receipt.userId.toString())
+                .collection("receipts")
+                .document(receipt.id.toString())
+                .delete()
                 .addOnSuccessListener {
                     Log.d("Firestore", "Receipt successfully deleted!")
                 }
