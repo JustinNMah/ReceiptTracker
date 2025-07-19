@@ -28,46 +28,12 @@ class ReceiptRepositoryImpl(
 
     override suspend fun insertReceipt(receipt: Receipt) {
         dao.insertReceipt(receipt)
-
-        try {
-            db.collection("users")
-                .document(receipt.userId.toString())
-                .collection("receipts")
-                .document(receipt.id.toString())
-                .set(receipt)
-                .addOnSuccessListener {
-                    Log.d("Firestore", "Receipt successfully written!")
-                }
-                .addOnFailureListener { e ->
-                    Log.e("Firestore", "Error writing receipt", e)
-                    scheduleSync()
-                }
-        } catch (e: Exception) {
-            Log.e("Firestore", "Exception during insert: ${e.message}")
-            scheduleSync()
-        }
+        scheduleSync()
     }
 
     override suspend fun deleteReceipt(receipt: Receipt) {
         dao.deleteReceipt(receipt)
-
-        try {
-            db.collection("users")
-                .document(receipt.userId.toString())
-                .collection("receipts")
-                .document(receipt.id.toString())
-                .delete()
-                .addOnSuccessListener {
-                    Log.d("Firestore", "Receipt successfully deleted!")
-                }
-                .addOnFailureListener { e ->
-                    Log.e("Firestore", "Error deleting receipt", e)
-                    scheduleDelete(receipt.id.toString(), receipt.userId.toString())
-                }
-        } catch (e: Exception) {
-            Log.e("Firestore", "Exception during delete: ${e.message}")
-            scheduleDelete(receipt.id.toString(), receipt.userId.toString())
-        }
+        scheduleDelete(receipt.id.toString(), receipt.userId.toString())
     }
 
     override suspend fun modifyReceipt(
