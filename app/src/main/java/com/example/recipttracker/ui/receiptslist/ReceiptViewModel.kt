@@ -16,22 +16,33 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import java.util.UUID
 
 @HiltViewModel
 class ReceiptViewModel @Inject constructor(
     private val repository: ReceiptRepository
 ): ViewModel() {
 
+
+
+
+
+
+
+
+
+
+
     private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
 
     private var getReceiptsCoroutine: Job? = null
-    private var userId: Int? = null
+    private var userId: UUID? = null
     init {
         getReceipts(_state.value.receiptSortOrder)
     }
 
-    fun setUser(userId: Int) {
+    fun setUser(userId: UUID) {
         this.userId = userId
         getReceipts(_state.value.receiptSortOrder)
     }
@@ -114,7 +125,7 @@ class ReceiptViewModel @Inject constructor(
         )
     }
 
-    fun searchReceipts(userId: Int, query: String) {
+    fun searchReceipts(userId: UUID, query: String) {
         getReceiptsCoroutine?.cancel()
 
         if (query.isBlank()) {

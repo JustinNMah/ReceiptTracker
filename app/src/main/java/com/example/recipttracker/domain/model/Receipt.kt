@@ -6,11 +6,12 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 @Entity
 data class Receipt(
-    @PrimaryKey(autoGenerate = true) val id: Int? = null,
-    val userId: Int, // Maps to the userId
+    @PrimaryKey val id: UUID = UUID.randomUUID(),
+    val userId: UUID, // Maps to the userId
     val store: String,
     val amount: String,
     val date: String, // format as: yyyy-MM-dd

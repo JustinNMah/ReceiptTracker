@@ -13,6 +13,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.recipttracker.domain.util.ReceiptSyncWorker
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.UUID
+
 
 class ReceiptRepositoryImpl(
     private val dao: ReceiptDao,
@@ -20,11 +22,11 @@ class ReceiptRepositoryImpl(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ): ReceiptRepository {
 
-    override fun getReceipts(userId: Int): Flow<List<Receipt>> {
+    override fun getReceipts(userId: UUID): Flow<List<Receipt>> {
         return dao.getReceipts(userId)
     }
 
-    override suspend fun getReceiptById(id: Int, userId: Int): Receipt? {
+    override suspend fun getReceiptById(id: UUID, userId: UUID): Receipt? {
         return dao.getReceiptById(id, userId)
     }
 
@@ -72,7 +74,7 @@ class ReceiptRepositoryImpl(
     }
 
     override suspend fun modifyReceipt(
-        id: Int,
+        id: UUID,
         store: String,
         amount: String,
         date: String,
@@ -84,7 +86,7 @@ class ReceiptRepositoryImpl(
         Log.d("TAG", "Number of rows modified: $numberOfRowsAffected")
     }
 
-    override fun searchReceipts(userId: Int, query: String): Flow<List<Receipt>> {
+    override fun searchReceipts(userId: UUID, query: String): Flow<List<Receipt>> {
         return dao.searchReceipts(userId, query)
     }
 

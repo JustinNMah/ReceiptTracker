@@ -5,6 +5,7 @@ import com.example.recipttracker.domain.model.User
 import com.example.recipttracker.domain.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import at.favre.lib.crypto.bcrypt.BCrypt
+import java.util.UUID
 
 class UserRepositoryImpl(
     private val userDao: UserDao
@@ -12,10 +13,6 @@ class UserRepositoryImpl(
 
     override fun getAllUsers(): Flow<List<User>> {
         return userDao.getUsers()
-    }
-
-    override suspend fun getUserById(id: Int): User? {
-        return userDao.getUserById(id)
     }
 
     override suspend fun getUserByUsername(username: String): User? {
