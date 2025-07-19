@@ -1,4 +1,4 @@
-package com.example.recipttracker.domain.util
+package com.example.recipttracker.data.workers
 
 import android.content.Context
 import android.util.Log

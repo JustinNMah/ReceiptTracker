@@ -14,13 +14,13 @@ import java.util.UUID
 interface ReceiptDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertReceipt(receipt: Receipt): Long // Returns receipt id
+    suspend fun insertReceipt(receipt: Receipt)
 
     @Update
     suspend fun updateReceipt(receipt: Receipt) // TODO: Consider removing this? Cause insertReceipt has conflict strategy of replace
 
     @Delete
-    suspend fun deleteReceipt(receipt: Receipt) // TODO: Maybe change to deleteReceiptById
+    suspend fun deleteReceipt(receipt: Receipt)
 
     @Query("SELECT * FROM receipt WHERE userId = :userId")
     fun getReceipts(userId: UUID): Flow<List<Receipt>>
