@@ -15,6 +15,8 @@ import com.example.recipttracker.domain.util.ReceiptSyncWorker
 import com.example.recipttracker.data.workers.ReceiptDeleteWorker //links to new /workers folder
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.concurrent.TimeUnit
+import java.util.UUID
+
 
 class ReceiptRepositoryImpl(
     private val dao: ReceiptDao,
@@ -22,7 +24,7 @@ class ReceiptRepositoryImpl(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : ReceiptRepository {
 
-    override fun getReceipts(userId: Int): Flow<List<Receipt>> {
+    override fun getReceipts(userId: UUID): Flow<List<Receipt>> {
         return dao.getReceipts(userId)
     }
 
@@ -37,7 +39,7 @@ class ReceiptRepositoryImpl(
     }
 
     override suspend fun modifyReceipt(
-        id: Int,
+        id: UUID,
         store: String,
         amount: String,
         date: String,
@@ -47,16 +49,13 @@ class ReceiptRepositoryImpl(
         dao.modifyReceipt(id, store, amount, date, category, filePath)
     }
 
-
-    override suspend fun getReceiptById(id: Int, userId: Int): Receipt? {
+    override suspend fun getReceiptById(id: UUID, userId: UUID): Receipt? {
         return dao.getReceiptById(id, userId)
     }
 
     override suspend fun getUnsyncedReceipts(): List<Receipt> {
         return dao.getUnsyncedReceipts()
     }
-
-
 
     private fun scheduleSync() {
         val constraints = Constraints.Builder()
@@ -90,4 +89,8 @@ class ReceiptRepositoryImpl(
         WorkManager.getInstance(context).enqueue(request)
     }
 
+
+    override fun searchReceipts(userId: UUID, query: String): Flow<List<Receipt>> {
+        return dao.searchReceipts(userId, query)
+    }
 }

@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.example.recipttracker.domain.model.Receipt
 import kotlinx.coroutines.flow.Flow
+import java.util.UUID
 
 @Dao
 interface ReceiptDao {
@@ -22,15 +23,25 @@ interface ReceiptDao {
     suspend fun deleteReceipt(receipt: Receipt) // TODO: Maybe change to deleteReceiptById // added the deleteReceipt functionality, maybe this is no longer needed?
 
     @Query("SELECT * FROM receipt WHERE userId = :userId")
-    fun getReceipts(userId: Int): Flow<List<Receipt>>
+    fun getReceipts(userId: UUID): Flow<List<Receipt>>
 
     @Query("SELECT * FROM receipt WHERE id = :id AND userId = :userId")
-    suspend fun getReceiptById(id: Int, userId: Int): Receipt?
+    suspend fun getReceiptById(id: UUID, userId: UUID): Receipt?
 
     @Query(
         "UPDATE receipt SET store = :store, amount = :amount, date = :date, category = :category, filePath = :filePath WHERE id = :id"
     )
-    suspend fun modifyReceipt(id: Int, store: String, amount: String, date: String, category: String, filePath: String): Int
+    suspend fun modifyReceipt(id: UUID, store: String, amount: String, date: String, category: String, filePath: String): Int
+
+    @Query("""
+        SELECT * FROM receipt 
+        WHERE userId = :userId AND (
+            store LIKE '%' || :query || '%' OR
+            category LIKE '%' || :query || '%' OR
+            date LIKE '%' || :query || '%'
+        )
+    """)
+    fun searchReceipts(userId: UUID, query: String): Flow<List<Receipt>>
 
     @Query("SELECT * FROM receipt WHERE syncedWithCloud = 0")
     suspend fun getUnsyncedReceipts(): List<Receipt>

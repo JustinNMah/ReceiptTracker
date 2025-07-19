@@ -4,9 +4,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,6 +37,11 @@ import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
 import java.io.File
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,6 +90,7 @@ fun ViewReceipt(
         ) {
             val file = File(filePath)
             val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            var showFullScreen by remember { mutableStateOf(false) }
 
             bitmap?.let {
                 Image(
@@ -91,7 +99,21 @@ fun ViewReceipt(
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 16.dp)
                         .size(200.dp)
+                        .clickable { showFullScreen = true }
                 )
+            }
+
+            if (showFullScreen) {
+                Dialog(onDismissRequest = { showFullScreen = false }) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Full Screen Receipt",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { showFullScreen = false }
+                    )
+                }
             }
 
             Card(
