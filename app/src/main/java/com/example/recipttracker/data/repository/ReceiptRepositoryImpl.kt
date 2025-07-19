@@ -1,7 +1,6 @@
 package com.example.recipttracker.data.repository
 
 import android.content.Context
-import android.util.Log
 import com.example.recipttracker.data.local.ReceiptDao
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.repository.ReceiptRepository
@@ -11,17 +10,14 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.recipttracker.domain.util.ReceiptSyncWorker
 import com.example.recipttracker.data.workers.ReceiptDeleteWorker //links to new /workers folder
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.recipttracker.data.workers.ReceiptSyncWorker
 import java.util.concurrent.TimeUnit
 import java.util.UUID
 
-
 class ReceiptRepositoryImpl(
     private val dao: ReceiptDao,
-    private val context: Context,
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val context: Context
 ) : ReceiptRepository {
 
     override fun getReceipts(userId: UUID): Flow<List<Receipt>> {
