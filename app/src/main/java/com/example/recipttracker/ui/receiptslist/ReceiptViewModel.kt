@@ -22,17 +22,6 @@ import java.util.UUID
 class ReceiptViewModel @Inject constructor(
     private val repository: ReceiptRepository
 ): ViewModel() {
-
-
-
-
-
-
-
-
-
-
-
     private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
 
