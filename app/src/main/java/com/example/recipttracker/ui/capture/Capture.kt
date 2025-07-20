@@ -18,13 +18,14 @@ import java.io.ByteArrayOutputStream
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import com.example.recipttracker.data.repository.ExtractionResult
 import com.example.recipttracker.data.repository.TextRecognitionRepositoryImpl
 
 import kotlinx.coroutines.launch
 @Composable
 fun CaptureScreen() {
     val context = LocalContext.current
-    var recognizedText by remember { mutableStateOf<String?>(null) }
+    var recognizedText by remember { mutableStateOf<ExtractionResult?>(null) }
     val scope = rememberCoroutineScope()
     val repository = remember { TextRecognitionRepositoryImpl() }
 
@@ -39,7 +40,7 @@ fun CaptureScreen() {
 
         if (recognizedText == null) {
             Image(
-                painter = painterResource(id = R.drawable.costco_receipt),
+                painter = painterResource(id = R.drawable.no_frills),
                 contentDescription = "Sample Receipt",
                 modifier = Modifier.size(500.dp)
             )
@@ -52,16 +53,20 @@ fun CaptureScreen() {
                         try {
                             val bitmap = BitmapFactory.decodeResource(
                                 context.resources,
-                                R.drawable.costco_receipt
+                                R.drawable.no_frills
                             )
                             val stream = ByteArrayOutputStream()
                             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
                             val imageData = stream.toByteArray()
 
                             val result = repository.recognizeTextFromImage(imageData)
-                            recognizedText = result.joinToString("\n")
+                            recognizedText = result
                         } catch (e: Exception) {
-                            recognizedText = "Error: ${e.localizedMessage}"
+                            recognizedText = ExtractionResult(
+                                collectedItems = emptyList(),
+                                total = "",
+                                title = "Error: ${e.localizedMessage}"
+                            )
                         }
                     }
                 },
@@ -75,10 +80,16 @@ fun CaptureScreen() {
 
         recognizedText?.let {
             Text(
-                text = it,
+                text = buildString {
+                    append("Title: ${it.title}\n")
+                    append("Total: ${it.total}\n\n")
+                    append("Items:\n")
+                    append(it.collectedItems.joinToString("\n"))
+                },
                 style = MaterialTheme.typography.bodySmall
             )
         }
+
     }
 }
 

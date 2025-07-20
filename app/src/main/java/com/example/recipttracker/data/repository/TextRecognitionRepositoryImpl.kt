@@ -9,11 +9,17 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+data class ExtractionResult(
+    val collectedItems: List<String> = emptyList(),
+    val total: String = "",
+    val title: String = ""
+)
+
 class TextRecognitionRepositoryImpl : TextRecognitionRepository {
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-    override suspend fun recognizeTextFromImage(imageData: ByteArray): List<String> =
+    override suspend fun recognizeTextFromImage(imageData: ByteArray): ExtractionResult =
         suspendCancellableCoroutine { cont ->
             val bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
             val image = InputImage.fromBitmap(bitmap, 0)
@@ -44,18 +50,29 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                         if (firstPriceY != null && totalLineY != null) break
                     }
 
-                    // Guard conditions
-                    if (firstPriceY == null || totalLineY == null || totalLineY <= firstPriceY) {
-                        cont.resume(emptyList()) // Nothing meaningful found
-                        return@addOnSuccessListener
+                    val collectedItems = mutableListOf<String>()
+                    var total = ""
+
+                    if (firstPriceY != null && totalLineY != null && totalLineY > firstPriceY) {
+                        for ((text, y, _) in allLinesWithY) {
+                            if (y > firstPriceY - 10 && y < totalLineY + 10){
+                                if (priceRegex.containsMatchIn(text)) {
+                                    total = text
+                                    continue
+                                }
+                                else{
+                                    collectedItems.add(text)
+                                }
+                            }
+                        }
                     }
 
-                    // Collect lines between firstPriceY and totalLineY
-                    val collectedItems = allLinesWithY.filter { (text, y, _) ->
-                        y > firstPriceY && y < totalLineY
-                    }.map { it.first }
-
-                    cont.resume(collectedItems)
+                    cont.resume(ExtractionResult(
+                        collectedItems = collectedItems,
+                        total = total,
+                        title = allLinesWithY.get(0).first
+                    )
+                    )
                 }
                 .addOnFailureListener { exception ->
                     cont.resumeWithException(exception)
