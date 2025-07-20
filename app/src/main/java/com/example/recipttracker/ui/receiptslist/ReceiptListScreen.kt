@@ -10,246 +10,242 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.recipttracker.ui.theme.ReceiptTrackerTheme
-import java.text.SimpleDateFormat
-import java.util.*
-
-enum class ReceiptSortOption(val label: String) {
-    DATE("Date"),
-    ALPHABETICAL("A–Z"),
-    CATEGORY("Category")
-}
-
-data class SortState(
-    val option: ReceiptSortOption,
-    val isAscending: Boolean = true
-)
-
-data class ReceiptItem(
-    val store: String,
-    val date: String,
-    val amount: String,
-    val category: String
-) {
-    // get month from dates
-    val monthYear: String
-        get() {
-            return try {
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val parsedDate = dateFormat.parse(date)
-                val calendar = Calendar.getInstance()
-                calendar.time = parsedDate!!
-
-                val monthFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-                monthFormat.format(calendar.time)
-            } catch (e: Exception) {
-                "Unknown"
-            }
-        }
-
-    val parsedDate: Date?
-        get() {
-            return try {
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                dateFormat.parse(date)
-            } catch (e: Exception) {
-                null
-            }
-        }
-}
+import com.example.recipttracker.domain.model.Receipt
+import com.example.recipttracker.domain.util.ReceiptSortOrder
+import com.example.recipttracker.domain.util.SortField
+import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
+import com.example.recipttracker.ViewModels.UserViewModel
+import kotlinx.coroutines.launch
+import android.util.Log
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
+import com.example.recipttracker.domain.event.UserEvent
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReceiptListScreen() {
-    var sortState by remember { mutableStateOf(SortState(ReceiptSortOption.DATE)) }
+fun ReceiptListScreen(
+    onCapture: () -> Unit,
+    onUpload: () -> Unit,
+    onLogout: () -> Unit,
+    onView: () -> Unit,
+    receiptViewModel: ReceiptViewModel,
+    userViewModel: UserViewModel,
+    modifyReceiptVM: ModifyReceiptVM
+) {
+    LaunchedEffect(Unit) {
+        snapshotFlow { userViewModel.state.value.user }
+            .collectLatest { user ->
+                if (user != null) {
+                    receiptViewModel.setUser(user.id)
+                }
+            }
+    }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var searchQuery by remember { mutableStateOf("") }
+    val userId = userViewModel.state.value.user?.id
+
+    LaunchedEffect(userId) {
+        snapshotFlow { searchQuery }
+            .debounce(300)
+            .distinctUntilChanged()
+            .collectLatest { query ->
+                userId?.let {
+                    receiptViewModel.searchReceipts(it, query)
+                }
+            }
+    }
+
+    val scope = rememberCoroutineScope()
+
+    val state = receiptViewModel.state.value
+    val sortState = state.receiptSortOrder
+    val receipts = state.receipts
+
     var showFabMenu by remember { mutableStateOf(false) }
 
-    val receipts = sampleReceipts.sortedWith(
-        when (sortState.option) {
-            ReceiptSortOption.DATE -> if (sortState.isAscending) {
-                compareBy { it.parsedDate }
-            } else {
-                compareByDescending { it.parsedDate }
-            }
-            ReceiptSortOption.ALPHABETICAL -> if (sortState.isAscending) {
-                compareBy { it.store }
-            } else {
-                compareByDescending { it.store }
-            }
-            ReceiptSortOption.CATEGORY -> if (sortState.isAscending) {
-                compareBy { it.category }
-            } else {
-                compareByDescending { it.category }
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Text(
+                    text = "Menu",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Logout") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { userViewModel.onEvent(UserEvent.Logout); onLogout(); drawerState.close() }
+                    }
+                )
             }
         }
-    )
-
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "ReceiptTracker",
-                        textAlign = TextAlign.Center
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* handle menu click */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* handle search click */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            Box {
-                FloatingActionButton(
-                    onClick = { showFabMenu = true }
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add receipt")
-                }
-
-                DropdownMenu(
-                    expanded = showFabMenu,
-                    onDismissRequest = { showFabMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Capture") },
-                        onClick = {
-                            showFabMenu = false
-                            // handle capture click
+    ) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text("ReceiptTracker", textAlign = TextAlign.Center)
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Upload") },
-                        onClick = {}
-                    )
+                    },
+                    actions = {
+                        var isSearching by remember { mutableStateOf(false) }
+
+                        if (isSearching) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                TextField(
+                                    value = searchQuery,
+                                    onValueChange = { searchQuery = it },
+                                    singleLine = true,
+                                    placeholder = { Text("Search...") },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 8.dp),
+                                    textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface)
+                                )
+                                IconButton(
+                                    onClick = {
+                                        searchQuery = ""
+                                        isSearching = false
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Clear Search"
+                                    )
+                                }
+                            }
+                        } else {
+                            IconButton(onClick = { isSearching = true }) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                Box {
+                    FloatingActionButton(onClick = { showFabMenu = true }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add receipt")
+                    }
+
+                    DropdownMenu(
+                        expanded = showFabMenu,
+                        onDismissRequest = { showFabMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Capture") },
+                            onClick = {
+                                showFabMenu = false
+                                onCapture()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Upload") },
+                            onClick = {
+                                showFabMenu = false
+                                onUpload()
+                            }
+                        )
+                    }
                 }
             }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            SingleChoiceSegmentedButtonRow(
+        ) { padding ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .padding(padding)
             ) {
-                ReceiptSortOption.entries.forEachIndexed { index, option ->
-                    SegmentedButton(
-                        selected = sortState.option == option,
-                        onClick = {
-                            sortState = if (sortState.option == option) {
-                                sortState.copy(isAscending = !sortState.isAscending)
-                            } else {
-                                SortState(option, isAscending = true)
-                            }
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = ReceiptSortOption.entries.size
-                        )
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(option.label)
-                            if (sortState.option == option) {
-                                Icon(
-                                    imageVector = if (sortState.isAscending) {
-                                        Icons.Default.KeyboardArrowUp
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    SortField.entries.forEachIndexed { index, option ->
+                        SegmentedButton(
+                            selected = sortState.field == option,
+                            onClick = {
+                                val newSortState: ReceiptSortOrder = if (sortState.field == option) {
+                                    sortState.copy(isAscending = !sortState.isAscending)
+                                } else {
+                                    if (option == SortField.DATE) {
+                                        ReceiptSortOrder(option, isAscending = false)
                                     } else {
-                                        Icons.Default.KeyboardArrowDown
-                                    },
-                                    contentDescription = if (sortState.isAscending) "Ascending" else "Descending",
-                                    modifier = Modifier.size(16.dp)
+                                        ReceiptSortOrder(option, isAscending = true)
+                                    }
+                                }
+                                receiptViewModel.onEvent(ReceiptsEvent.Order(newSortState))
+                            },
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = SortField.entries.size
+                            )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(option.toString())
+                                if (sortState.field == option) {
+                                    Icon(
+                                        imageVector = if (sortState.isAscending) {
+                                            Icons.Default.KeyboardArrowUp
+                                        } else {
+                                            Icons.Default.KeyboardArrowDown
+                                        },
+                                        contentDescription = if (sortState.isAscending) "Ascending" else "Descending",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    receipts.forEach { (category, items) ->
+                        item {
+                            Column {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                                Text(
+                                    text = category,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
                                 )
                             }
                         }
-                    }
-                }
-            }
-
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                when (sortState.option) {
-                    ReceiptSortOption.DATE -> {
-                        // date -> group by month
-                        val grouped = receipts.groupBy { it.monthYear }
-                        grouped.forEach { (month, items) ->
-                            item {
-                                Column {
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        thickness = 1.dp,
-                                        color = MaterialTheme.colorScheme.outline
-                                    )
-                                    Text(
-                                        text = month,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    )
-                                }
-                            }
-                            items(items) { receipt ->
-                                ReceiptListItem(receipt)
-                            }
-                        }
-                    }
-                    ReceiptSortOption.CATEGORY -> {
-                        // group by category
-                        val grouped = receipts.groupBy { it.category }
-                        grouped.forEach { (category, items) ->
-                            item {
-                                Column {
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        thickness = 1.dp,
-                                        color = MaterialTheme.colorScheme.outline
-                                    )
-                                    Text(
-                                        text = category,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                    )
-                                }
-                            }
-                            items(items) { receipt ->
-                                ReceiptListItem(receipt)
-                            }
-                        }
-                    }
-                    else -> {
-                        // a-z sorting
-                        items(receipts) { receipt ->
-                            ReceiptListItem(receipt)
+                        items(items) { receipt ->
+                            ReceiptListItem(onView, receipt, modifyReceiptVM) // might have to change later. this drilling is probably bad design
                         }
                     }
                 }
@@ -259,15 +255,28 @@ fun ReceiptListScreen() {
 }
 
 @Composable
-fun ReceiptListItem(receipt: ReceiptItem) {
+fun ReceiptListItem(
+    onView: () -> Unit,
+    receipt: Receipt,
+    modifyReceiptVM: ModifyReceiptVM
+) {
+    var showModifyMenu by remember { mutableStateOf(false) }
+    val cardShape = RoundedCornerShape(12.dp)
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .border(1.dp, Color.Gray, cardShape)
+            .clickable {
+                Log.d("ReceiptListScreen", "Receipt ${receipt.id} pressed")
+                modifyReceiptVM.setReceiptToEdit(receipt)
+                onView()
+            }
+        ,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondary
+            containerColor = Color.Transparent
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = cardShape,
     ) {
         ListItem(
             headlineContent = { Text(receipt.store) },
@@ -278,25 +287,10 @@ fun ReceiptListItem(receipt: ReceiptItem) {
             },
             trailingContent = {
                 Text(
-                    text = receipt.amount,
+                    text = "$${receipt.amount}",
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
         )
-    }
-}
-
-val sampleReceipts = listOf(
-    ReceiptItem("Walmart", "2025-06-19", "$120.00", "Groceries"),
-    ReceiptItem("NoFrills", "2025-06-10", "$42.10", "Groceries"),
-    ReceiptItem("Bob's", "2025-06-05", "$34.99", "Groceries"),
-    ReceiptItem("Apple Store", "2025-05-25", "$999.00", "Electronics")
-)
-
-@Preview(showBackground = true)
-@Composable
-fun ReceiptListScreenPreview() {
-    ReceiptTrackerTheme {
-        ReceiptListScreen()
     }
 }

@@ -6,9 +6,13 @@ plugins {
     alias(libs.plugins.dagger.hilt)
     alias(libs.plugins.ksp)
     kotlin("kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+    }
     namespace = "com.example.recipttracker"
     compileSdk = 35
 
@@ -57,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -64,6 +69,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("at.favre.lib:bcrypt:0.10.2")
 
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
@@ -82,6 +88,13 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     // Retrofit - add dependencies for this when we store database in cloud
+
+    // Firebase Firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.10.2")
 
     // Google MLKit Dependencies
     implementation("com.google.mlkit:text-recognition:16.0.1")
