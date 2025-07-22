@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
@@ -60,6 +61,13 @@ fun ModifyReceiptUI(
 
     val file = File(filePath.value)
     val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+    val validAmounts = Regex("^\\d*(\\.\\d{0,2})?$")
+    val allCategories = receiptViewModel.state.value.receipts
+        .values.flatten()
+        .map { it.category }
+        .distinct()
+        .filter { it.isNotBlank() }
 
     Scaffold(
         topBar = {
@@ -103,32 +111,41 @@ fun ModifyReceiptUI(
                 value = store.value,
                 onValueChange = { store.value = it },
                 label = { Text("Store") },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done
+                ),
                 modifier = Modifier.padding(8.dp)
             )
             OutlinedTextField(
                 value = amount.value,
                 onValueChange = { input ->
-                    Log.d("ModifyReceiptUI", input)
-                    if (input.all { it.isDigit() }) {
+                    if (validAmounts.matches(input)) {
                         amount.value = input
                     }
                 },
                 label = { Text("Total") },
                 modifier = Modifier.padding(8.dp),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
                 trailingIcon = { Text("$") }
             )
             OutlinedTextField(
                 value = date.value,
                 onValueChange = { date.value = it },
                 label = { Text("Date") },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done
+                ),
                 modifier = Modifier.padding(8.dp)
             )
-            OutlinedTextField(
-                value = category.value,
-                onValueChange = { category.value = it },
-                label = { Text("Category") },
+            AutoCompleteCategory(
+                categoryState = category,
+                suggestions = allCategories,
                 modifier = Modifier.padding(8.dp)
             )
             Row(
