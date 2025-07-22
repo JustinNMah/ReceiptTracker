@@ -1,6 +1,5 @@
 package com.example.recipttracker.ui.addEditReceipt
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,6 +17,9 @@ class ModifyReceiptVM(): ViewModel() {
 
     private var _date: MutableLiveData<String> = MutableLiveData<String>()
     val date: LiveData<String> = _date
+
+    private var _data: MutableLiveData<Set<String>> = MutableLiveData<Set<String>>()
+    val data: LiveData<Set<String>> = _data
 
     private var _category: MutableLiveData<String> = MutableLiveData<String>()
     val category: LiveData<String> = _category
