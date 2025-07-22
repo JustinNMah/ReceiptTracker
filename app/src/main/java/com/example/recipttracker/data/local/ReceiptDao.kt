@@ -38,7 +38,8 @@ interface ReceiptDao {
         WHERE userId = :userId AND (
             store LIKE '%' || :query || '%' OR
             category LIKE '%' || :query || '%' OR
-            date LIKE '%' || :query || '%'
+            date LIKE '%' || :query || '%' OR
+            data LIKE '%' || :query || '%'
         )
     """)
     fun searchReceipts(userId: UUID, query: String): Flow<List<Receipt>>
