@@ -10,7 +10,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 data class ExtractionResult(
-    val collectedItems: List<String> = emptyList(),
+    val collectedItems: Set<String> = emptySet(),
     val total: String = "",
     val title: String = ""
 )
@@ -26,7 +26,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
 
             recognizer.process(image)
                 .addOnSuccessListener { visionText ->
-                    val priceRegex = Regex("""\$?\s?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})$""")
+                    val priceRegex = Regex("""\$?\s*((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2}))""")
                     val totalRegex = Regex("""\btotal\b""", RegexOption.IGNORE_CASE)
 
                     val allLinesWithY = visionText.textBlocks.flatMap { block ->
@@ -50,7 +50,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                         if (firstPriceY != null && totalLineY != null) break
                     }
 
-                    val collectedItems = mutableListOf<String>()
+                    val collectedItems = mutableSetOf<String>()
                     var total = ""
 
                     if (firstPriceY != null && totalLineY != null && totalLineY > firstPriceY) {
@@ -67,12 +67,19 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                         }
                     }
 
+                    val amountMatch = priceRegex.find(total)
+                    val amountNumber = if (amountMatch != null) {
+                        amountMatch.groups[1]?.value?.replace(",", "") ?: total
+                    } else {
+                        total
+                    }
+
+
                     cont.resume(ExtractionResult(
                         collectedItems = collectedItems,
-                        total = total,
-                        title = allLinesWithY.get(0).first
-                    )
-                    )
+                        total = amountNumber,
+                        title = allLinesWithY[0].first
+                    ))
                 }
                 .addOnFailureListener { exception ->
                     cont.resumeWithException(exception)

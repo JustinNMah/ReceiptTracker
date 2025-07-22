@@ -30,15 +30,14 @@ fun Processing(
         scope.launch {
             try {
                 val bitmap = BitmapFactory.decodeFile(
-                    modifyReceiptVM.filePath.toString()
+                    modifyReceiptVM.filePath.value
                 )
                 val stream = ByteArrayOutputStream()
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
                 val imageData = stream.toByteArray()
 
                 val result = repository.recognizeTextFromImage(imageData)
-//                modifyReceiptVM.store = result.title
-//                modifyReceiptVM.amount = result.total
+                modifyReceiptVM.editReceiptToAdd(result.title, result.total, result.collectedItems)
                 onFinish()
             } catch (e: Exception) {
                 onFail()

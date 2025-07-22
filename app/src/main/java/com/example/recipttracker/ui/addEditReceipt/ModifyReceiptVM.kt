@@ -37,6 +37,7 @@ class ModifyReceiptVM(): ViewModel() {
         _store.value = receiptToEdit.store
         _amount.value = receiptToEdit.amount
         _date.value = receiptToEdit.date
+        _data.value = receiptToEdit.data
         _category.value = receiptToEdit.category
         _filePath.value = receiptToEdit.filePath
     }
@@ -46,7 +47,14 @@ class ModifyReceiptVM(): ViewModel() {
         _store.value = ""
         _amount.value = ""
         _date.value = ""
+        _data.value = emptySet()
         _category.value = ""
         _filePath.value = filePath
+    }
+
+    fun editReceiptToAdd(store: String, amount: String, data: Set<String>) {
+        _store.value = store
+        _amount.value = amount
+        _data.value = data
     }
 }
