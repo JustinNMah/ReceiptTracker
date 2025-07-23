@@ -58,11 +58,8 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                             if (y > firstPriceY - 10 && y < totalLineY + 10){
                                 if (priceRegex.containsMatchIn(text)) {
                                     total = text
-                                    continue
                                 }
-                                else{
-                                    collectedItems.add(text)
-                                }
+                                collectedItems.add(text)
                             }
                         }
                     }

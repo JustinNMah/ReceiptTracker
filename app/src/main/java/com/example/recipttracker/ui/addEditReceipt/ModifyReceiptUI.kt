@@ -55,6 +55,7 @@ fun ModifyReceiptUI(
     val store: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.store.value!!) }
     val amount: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.amount.value!!) }
     val date: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.date.value!!) }
+    val data: MutableState<Set<String>> = remember { mutableStateOf(modifyReceiptVM.data.value!!) }
     val category: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.category.value!!) }
     val filePath: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.filePath.value!!) }
 
@@ -109,14 +110,14 @@ fun ModifyReceiptUI(
                 value = amount.value,
                 onValueChange = { input ->
                     Log.d("ModifyReceiptUI", input)
-                    if (input.all { it.isDigit() }) {
+                    if (input.matches(Regex("^\\d*(\\.\\d{0,2})?$"))) {
                         amount.value = input
                     }
                 },
                 label = { Text("Total") },
                 modifier = Modifier.padding(8.dp),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 trailingIcon = { Text("$") }
             )
             OutlinedTextField(
@@ -170,10 +171,12 @@ fun ModifyReceiptUI(
                                         store = store.value,
                                         amount = amount.value,
                                         date = date.value,
+                                        data = data.value,
                                         category = category.value,
                                         filePath = filePath.value
                                     )
                                     receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
+                                    Log.e("ModifyReceiptUI", "Receipt Added. Data: ${data.value}")
                                 } ?: run {
                                     Log.e("ModifyReceiptUI", "Cannot add receipt: user is not logged in.")
                                 }
