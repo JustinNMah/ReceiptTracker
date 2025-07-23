@@ -224,18 +224,24 @@ fun ModifyReceiptUI(
                         when (modifyReceiptVM.mode.value) {
                             Mode.EDIT -> {
                                 user?.let {
-                                    receiptViewModel.onEvent(ReceiptsEvent.ModifyReceipt(
-                                        modifyReceiptVM.receiptToEdit.value!!.id!!,
-                                        store.value,
-                                        amount.value,
-                                        date.value,
-                                        category.value,
-                                        filePath.value
-                                    ))
+                                    receiptViewModel.onEvent(
+                                        ReceiptsEvent.ModifyReceipt(
+                                            modifyReceiptVM.receiptToEdit.value!!.id!!,
+                                            store.value,
+                                            amount.value,
+                                            date.value,
+                                            category.value,
+                                            filePath.value
+                                        )
+                                    )
                                 } ?: run {
-                                    Log.e("ModifyReceiptUI", "Cannot edit receipt: user is not logged in.")
+                                    Log.e(
+                                        "ModifyReceiptUI",
+                                        "Cannot edit receipt: user is not logged in."
+                                    )
                                 }
                             }
+
                             Mode.ADD -> {
                                 user?.let {
                                     val newReceipt = Receipt(
@@ -250,7 +256,10 @@ fun ModifyReceiptUI(
                                     receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
                                     Log.e("ModifyReceiptUI", "Receipt Added. Data: ${data.value}")
                                 } ?: run {
-                                    Log.e("ModifyReceiptUI", "Cannot add receipt: user is not logged in.")
+                                    Log.e(
+                                        "ModifyReceiptUI",
+                                        "Cannot add receipt: user is not logged in."
+                                    )
                                 }
                             }
                         }
@@ -266,7 +275,6 @@ fun ModifyReceiptUI(
             }
         }
     }
-}
 
     // Date Picker Dialog
     if (showDatePicker) {

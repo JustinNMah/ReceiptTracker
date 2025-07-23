@@ -17,6 +17,10 @@ import com.example.recipttracker.data.repository.TextRecognitionRepositoryImpl
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
 
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 @Composable
 fun Processing(
     onFinish: () -> Unit,
@@ -37,7 +41,10 @@ fun Processing(
                 val imageData = stream.toByteArray()
 
                 val result = repository.recognizeTextFromImage(imageData)
-                modifyReceiptVM.editReceiptToAdd(result.title, result.total, result.collectedItems)
+
+                val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val currentDateString = formatter.format(Date())
+                modifyReceiptVM.editReceiptToAdd(result.title, result.total, currentDateString, result.collectedItems)
                 onFinish()
             } catch (e: Exception) {
                 onFail()

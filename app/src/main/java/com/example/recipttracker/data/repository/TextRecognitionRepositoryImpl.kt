@@ -41,7 +41,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
 
                     // Find first price and total line Y values
                     for ((text, y, _) in allLinesWithY) {
-                        if ((totalLineY == null) && priceRegex.containsMatchIn(text)) {
+                        if (firstPriceY == null && priceRegex.containsMatchIn(text)) {
                             firstPriceY = y
                         }
                         if (totalRegex.containsMatchIn(text)) {

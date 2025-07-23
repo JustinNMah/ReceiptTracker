@@ -52,9 +52,10 @@ class ModifyReceiptVM(): ViewModel() {
         _filePath.value = filePath
     }
 
-    fun editReceiptToAdd(store: String, amount: String, data: Set<String>) {
+    fun editReceiptToAdd(store: String, amount: String, date: String, data: Set<String>) {
         _store.value = store
         _amount.value = amount
+        _date.value = date
         _data.value = data
     }
 }
