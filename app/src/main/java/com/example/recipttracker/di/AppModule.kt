@@ -45,7 +45,7 @@ object AppModule {
     }
     @Provides
     @Singleton
-    fun provideUserRepository(db: UserDatabase): UserRepository {
-        return UserRepositoryImpl(db.userDao)
+    fun provideUserRepository(db: UserDatabase, app: Application): UserRepository {
+        return UserRepositoryImpl(db.userDao, app.applicationContext)
     }
 }
