@@ -10,6 +10,7 @@ import com.example.recipttracker.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.recipttracker.util.SessionManager
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
@@ -69,6 +70,7 @@ class UserViewModel @Inject constructor(
             _state.value = UserState(isLoading = true)
             val user = userRepository.authenticateUser(username, password)
             _state.value = if (user != null) {
+                SessionManager.setLoggedIn(true)
                 UserState(success = true, user = user)
             } else {
                 UserState(error = "Invalid credentials")
@@ -77,6 +79,7 @@ class UserViewModel @Inject constructor(
     }
 
     private fun logout() {
+        SessionManager.logout()
         viewModelScope.launch {
             _state.value = UserState()
         }
