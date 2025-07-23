@@ -95,4 +95,7 @@ dependencies {
 
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.10.2")
+
+    // Google MLKit Dependencies
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 }
