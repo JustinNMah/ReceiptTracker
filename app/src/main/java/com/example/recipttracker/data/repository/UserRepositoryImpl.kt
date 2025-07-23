@@ -122,4 +122,9 @@ class UserRepositoryImpl(
 
         WorkManager.getInstance(context).enqueue(request)
     }
+
+    override suspend fun getUserById(id: UUID): User? {
+        return userDao.getUserById(id)
+    }
+
 }

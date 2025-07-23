@@ -16,6 +16,7 @@ import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptUI
 import com.example.recipttracker.ViewModels.UserViewModel
 import com.example.recipttracker.ui.capture.Processing
 import com.example.recipttracker.ui.receiptslist.ViewReceipt
+import com.example.recipttracker.util.SessionManager
 
 @Composable
 fun AppNavigator() {
@@ -23,8 +24,8 @@ fun AppNavigator() {
     val receiptViewModel: ReceiptViewModel = hiltViewModel()
     val modifyReceiptVM: ModifyReceiptVM = viewModel()
     val userViewModel: UserViewModel = hiltViewModel()
-
-    NavHost(navController = navController, startDestination = "landing") {
+    val startDestination = if (SessionManager.isLoggedIn()) "receipts" else "landing"
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("landing") {
             LandingScreen(
                 onLogin = { navController.navigate("login") },

@@ -10,6 +10,7 @@ import com.example.recipttracker.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.recipttracker.util.SessionManager
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
@@ -17,6 +18,24 @@ class UserViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = mutableStateOf(UserState())
     val state: State<UserState> = _state
+
+    init {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            val storedUserId = SessionManager.getLoggedInUserId()
+            if (SessionManager.isLoggedIn() && storedUserId != null) {
+                val user = userRepository.getUserById(storedUserId)
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    success = true,
+                    user = user
+                )
+            } else {
+                _state.value = _state.value.copy(isLoading = false)
+            }
+        }
+    }
+
 
     fun onEvent(event: UserEvent) {
         when (event) {
@@ -69,6 +88,7 @@ class UserViewModel @Inject constructor(
             _state.value = UserState(isLoading = true)
             val user = userRepository.authenticateUser(username, password)
             _state.value = if (user != null) {
+                SessionManager.setLoggedIn(true, user.id)
                 UserState(success = true, user = user)
             } else {
                 UserState(error = "Invalid credentials")
@@ -77,6 +97,7 @@ class UserViewModel @Inject constructor(
     }
 
     private fun logout() {
+        SessionManager.logout()
         viewModelScope.launch {
             _state.value = UserState()
         }
