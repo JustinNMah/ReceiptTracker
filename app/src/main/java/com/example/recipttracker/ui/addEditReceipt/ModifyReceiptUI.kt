@@ -15,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -22,6 +24,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,15 +37,49 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.composed
+import androidx.compose.ui.platform.debugInspectorInfo
+import androidx.compose.ui.semantics.Role
 import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptsEvent
 import com.example.recipttracker.ViewModels.UserViewModel
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.filled.DateRange
 
-@Composable
+// Helper function to format date for display
+fun formatDateForDisplay(dateString: String): String {
+    if (dateString.isEmpty()) return ""
+
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val date = inputFormat.parse(dateString)
+        outputFormat.format(date!!)
+    } catch (e: Exception) {
+        dateString // Return original if parsing fails
+    }
+}
+
+// Helper function to parse date from YYYY-MM-DD format for date picker
+fun parseDateForPicker(dateString: String): Long? {
+    if (dateString.isEmpty()) return null
+
+    return try {
+        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        format.parse(dateString)?.time
+    } catch (e: Exception) {
+        null
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun ModifyReceiptUI(
     onFinish: () -> Unit,
     modifyReceiptVM: ModifyReceiptVM,
@@ -68,6 +106,12 @@ fun ModifyReceiptUI(
         .map { it.category }
         .distinct()
         .filter { it.isNotBlank() }
+
+    // Date picker state
+    var showDatePicker by remember { mutableStateOf(false) }
+    val initialDateMillis = if (modifyReceiptVM.mode.value == Mode.EDIT) parseDateForPicker(modifyReceiptVM.date.value ?: "") else null
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialDateMillis)
+
 
     Scaffold(
         topBar = {
@@ -134,18 +178,26 @@ fun ModifyReceiptUI(
                 trailingIcon = { Text("$") }
             )
             OutlinedTextField(
-                value = date.value,
-                onValueChange = { date.value = it },
+                value = formatDateForDisplay(date.value),
+                onValueChange = { },
                 label = { Text("Date") },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done
-                ),
-                modifier = Modifier.padding(8.dp)
+                placeholder = { Text("Select a date") },
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clickable { showDatePicker = true },
+                readOnly = true,
+                trailingIcon = {
+                    Icon(
+                        Icons.Default.DateRange,
+                        contentDescription = "Select date",
+                        modifier = Modifier.clickable { showDatePicker = true }
+                    )
+                }
             )
-            AutoCompleteCategory(
-                categoryState = category,
-                suggestions = allCategories,
+            OutlinedTextField(
+                value = category.value,
+                onValueChange = { category.value = it },
+                label = { Text("Category") },
                 modifier = Modifier.padding(8.dp)
             )
             Row(
@@ -206,6 +258,31 @@ fun ModifyReceiptUI(
                     Icon(Icons.Default.Check, contentDescription = "Cancel")
                 }
             }
+        }
+    }
+
+    // Date Picker Dialog
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        date.value = formatter.format(Date(millis))
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }
