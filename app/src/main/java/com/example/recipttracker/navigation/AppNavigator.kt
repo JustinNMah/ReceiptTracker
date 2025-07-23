@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptUI
 import com.example.recipttracker.ViewModels.UserViewModel
+import com.example.recipttracker.ui.capture.Processing
 import com.example.recipttracker.ui.receiptslist.ViewReceipt
 import com.example.recipttracker.util.SessionManager
 
@@ -66,13 +67,20 @@ fun AppNavigator() {
         }
         composable("camera") {
             Camera(
-                onFinish = { navController.navigate("modifyReceiptUI") },
+                onFinish = { navController.navigate("processing") },
                 onFail = { navController.navigate("receipts") },
                 modifyReceiptVM = modifyReceiptVM
             )
         }
         composable("cameraRoll") {
             CameraRoll(
+                onFinish = { navController.navigate("processing") },
+                onFail = { navController.navigate("receipts") },
+                modifyReceiptVM = modifyReceiptVM
+            )
+        }
+        composable("processing") {
+            Processing(
                 onFinish = { navController.navigate("modifyReceiptUI") },
                 onFail = { navController.navigate("receipts") },
                 modifyReceiptVM = modifyReceiptVM

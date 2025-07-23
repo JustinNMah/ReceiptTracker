@@ -3,7 +3,6 @@ package com.example.recipttracker.data.local
 import androidx.room.*
 import com.example.recipttracker.domain.model.User
 import kotlinx.coroutines.flow.Flow
-import java.util.UUID
 
 @Dao
 interface UserDao {
@@ -19,4 +18,10 @@ interface UserDao {
 
     @Query("SELECT * FROM user WHERE id = :id LIMIT 1")
     suspend fun getUserById(id: UUID): User?
+
+    @Update
+    suspend fun updateUser(user: User)
+
+    @Query("SELECT * FROM user WHERE syncedWithCloud = 0")
+    suspend fun getUnsyncedUsers(): List<User>
 }

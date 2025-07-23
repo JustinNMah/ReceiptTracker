@@ -96,6 +96,7 @@ fun ModifyReceiptUI(
     val store: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.store.value!!) }
     val amount: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.amount.value!!) }
     val date: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.date.value!!) }
+    val data: MutableState<Set<String>> = remember { mutableStateOf(modifyReceiptVM.data.value!!) }
     val category: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.category.value!!) }
     val filePath: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.filePath.value!!) }
 
@@ -223,18 +224,24 @@ fun ModifyReceiptUI(
                         when (modifyReceiptVM.mode.value) {
                             Mode.EDIT -> {
                                 user?.let {
-                                    receiptViewModel.onEvent(ReceiptsEvent.ModifyReceipt(
-                                        modifyReceiptVM.receiptToEdit.value!!.id!!,
-                                        store.value,
-                                        amount.value,
-                                        date.value,
-                                        category.value,
-                                        filePath.value
-                                    ))
+                                    receiptViewModel.onEvent(
+                                        ReceiptsEvent.ModifyReceipt(
+                                            modifyReceiptVM.receiptToEdit.value!!.id!!,
+                                            store.value,
+                                            amount.value,
+                                            date.value,
+                                            category.value,
+                                            filePath.value
+                                        )
+                                    )
                                 } ?: run {
-                                    Log.e("ModifyReceiptUI", "Cannot edit receipt: user is not logged in.")
+                                    Log.e(
+                                        "ModifyReceiptUI",
+                                        "Cannot edit receipt: user is not logged in."
+                                    )
                                 }
                             }
+
                             Mode.ADD -> {
                                 user?.let {
                                     val newReceipt = Receipt(
@@ -242,12 +249,17 @@ fun ModifyReceiptUI(
                                         store = store.value,
                                         amount = amount.value,
                                         date = date.value,
+                                        data = data.value,
                                         category = category.value,
                                         filePath = filePath.value
                                     )
                                     receiptViewModel.onEvent(ReceiptsEvent.AddReceipt(newReceipt))
+                                    Log.e("ModifyReceiptUI", "Receipt Added. Data: ${data.value}")
                                 } ?: run {
-                                    Log.e("ModifyReceiptUI", "Cannot add receipt: user is not logged in.")
+                                    Log.e(
+                                        "ModifyReceiptUI",
+                                        "Cannot add receipt: user is not logged in."
+                                    )
                                 }
                             }
                         }
