@@ -27,7 +27,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
             recognizer.process(image)
                 .addOnSuccessListener { visionText ->
                     val priceRegex = Regex("""\$?\s*((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2}))""")
-                    val totalRegex = Regex("""\btotal\b""", RegexOption.IGNORE_CASE)
+                    val totalRegex = Regex("total", RegexOption.IGNORE_CASE)
 
                     val allLinesWithY = visionText.textBlocks.flatMap { block ->
                         block.lines.mapNotNull { line ->
@@ -41,13 +41,12 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
 
                     // Find first price and total line Y values
                     for ((text, y, _) in allLinesWithY) {
-                        if (firstPriceY == null && priceRegex.containsMatchIn(text)) {
+                        if ((totalLineY == null) && priceRegex.containsMatchIn(text)) {
                             firstPriceY = y
                         }
-                        if (totalLineY == null && totalRegex.containsMatchIn(text)) {
+                        if (totalRegex.containsMatchIn(text)) {
                             totalLineY = y
                         }
-                        if (firstPriceY != null && totalLineY != null) break
                     }
 
                     val collectedItems = mutableSetOf<String>()
@@ -75,7 +74,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                     cont.resume(ExtractionResult(
                         collectedItems = collectedItems,
                         total = amountNumber,
-                        title = allLinesWithY[0].first
+                        title = allLinesWithY.get(0).first
                     ))
                 }
                 .addOnFailureListener { exception ->
