@@ -23,15 +23,16 @@ class ReceiptSyncWorker(
 
         try {
             unsynced.forEach { receipt ->
+                val updatedReceipt = receipt.copy(syncedWithCloud = true)
                 firestore
                     .collection("users")
                     .document(receipt.userId.toString())
                     .collection("receipts")
                     .document(receipt.id.toString())
-                    .set(receipt)
+                    .set(updatedReceipt)
                     .await()
 
-                dao.updateReceipt(receipt.copy(syncedWithCloud = true))
+                dao.updateReceipt(updatedReceipt)
             }
             Result.success()
         } catch (e: Exception) {

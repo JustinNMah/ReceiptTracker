@@ -10,11 +10,13 @@ import com.example.recipttracker.domain.state.ReceiptsListState
 import com.example.recipttracker.domain.repository.ReceiptRepository
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import java.util.UUID
 
@@ -34,6 +36,19 @@ class ReceiptViewModel @Inject constructor(
     fun setUser(userId: UUID) {
         this.userId = userId
         getReceipts(_state.value.receiptSortOrder)
+
+        // Get cloud database receipts and check if any are not in the local database. Add different receipts to local database
+        viewModelScope.launch {
+            val cloudReceipts = getCloudReceipts(userId)
+            val localReceipts = _state.value.receipts.values.flatten() // Flatten the local database's Map<String, List<Receipt>> to a single list
+            val localIds = localReceipts.map { it.id }.toSet()
+
+            val newCloudReceipts = cloudReceipts.filterNot { it.id in localIds }
+
+            if (newCloudReceipts.isNotEmpty()) {
+                repository.insertReceiptsFromCloud(newCloudReceipts)
+            }
+        }
     }
 
     fun onEvent(event: ReceiptsEvent) { // create an event when user changes Sort Order or Deletes Receipt.
@@ -129,4 +144,43 @@ class ReceiptViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+}
+
+private suspend fun getCloudReceipts(userId: UUID) : List<Receipt> {
+    val firestore = FirebaseFirestore.getInstance()
+
+    val snapshot = try {
+        firestore
+            .collection("users")
+            .document(userId.toString())
+            .collection("receipts")
+            .get()
+            .await()
+    } catch (e: Exception) {
+        return emptyList()
+    }
+
+    val receipts = mutableListOf<Receipt>()
+    for (doc in snapshot.documents) {
+        val data = doc.data ?: continue
+
+        val idMap = data["id"] as? Map<*, *> ?: continue
+        val idMSB = (idMap["mostSignificantBits"] as? Number)?.toLong() ?: continue
+        val idLSB = (idMap["leastSignificantBits"] as? Number)?.toLong() ?: continue
+        val id = UUID(idMSB, idLSB)
+        receipts.add(
+            Receipt(
+                id = id,
+                userId = userId,
+                store = data["store"] as? String ?: "",
+                amount = data["amount"] as? String ?: "",
+                date = data["date"] as? String ?: "",
+                category = data["category"] as? String ?: "",
+                filePath = data["filePath"] as? String ?: "",
+                syncedWithCloud = true
+            )
+        )
+    }
+
+    return receipts
 }

@@ -29,6 +29,12 @@ class ReceiptRepositoryImpl(
         scheduleSync()
     }
 
+    override suspend fun insertReceiptsFromCloud(receipts: List<Receipt>) {
+        for (receipt in receipts) {
+            dao.insertReceipt(receipt)
+        }
+    }
+
     override suspend fun deleteReceipt(receipt: Receipt) {
         dao.deleteReceipt(receipt)
         scheduleDelete(receipt.id.toString(), receipt.userId.toString())

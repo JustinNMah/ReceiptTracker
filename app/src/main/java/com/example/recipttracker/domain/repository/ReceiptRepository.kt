@@ -12,6 +12,8 @@ interface ReceiptRepository {
 
     suspend fun insertReceipt(receipt: Receipt)
 
+    suspend fun insertReceiptsFromCloud(receipts: List<Receipt>)
+
     suspend fun deleteReceipt(receipt: Receipt)
 
     suspend fun modifyReceipt(id: UUID, store: String, amount: String, date: String, category: String, filePath: String)
