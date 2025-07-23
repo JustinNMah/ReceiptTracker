@@ -34,4 +34,9 @@ class UserRepositoryImpl(
         val result = BCrypt.verifyer().verify(plainPassword.toCharArray(), user.hashedPassword)
         return if (result.verified) user else null
     }
+
+    override suspend fun getUserById(id: UUID): User? {
+        return userDao.getUserById(id)
+    }
+
 }

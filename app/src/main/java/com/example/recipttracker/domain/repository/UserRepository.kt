@@ -14,4 +14,5 @@ interface UserRepository {
 
     suspend fun authenticateUser(username: String, plainPassword: String): User?
 
+    suspend fun getUserById(id: UUID): User?
 }

@@ -19,6 +19,24 @@ class UserViewModel @Inject constructor(
     private val _state = mutableStateOf(UserState())
     val state: State<UserState> = _state
 
+    init {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            val storedUserId = SessionManager.getLoggedInUserId()
+            if (SessionManager.isLoggedIn() && storedUserId != null) {
+                val user = userRepository.getUserById(storedUserId)
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    success = true,
+                    user = user
+                )
+            } else {
+                _state.value = _state.value.copy(isLoading = false)
+            }
+        }
+    }
+
+
     fun onEvent(event: UserEvent) {
         when (event) {
             is UserEvent.Logout -> logout()
@@ -70,7 +88,7 @@ class UserViewModel @Inject constructor(
             _state.value = UserState(isLoading = true)
             val user = userRepository.authenticateUser(username, password)
             _state.value = if (user != null) {
-                SessionManager.setLoggedIn(true)
+                SessionManager.setLoggedIn(true, user.id)
                 UserState(success = true, user = user)
             } else {
                 UserState(error = "Invalid credentials")
