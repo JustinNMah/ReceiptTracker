@@ -17,7 +17,7 @@ interface ReceiptDao {
     suspend fun insertReceipt(receipt: Receipt)
 
     @Update
-    suspend fun updateReceipt(receipt: Receipt) // TODO: Consider removing this? Cause insertReceipt has conflict strategy of replace
+    suspend fun updateReceipt(receipt: Receipt)
 
     @Delete
     suspend fun deleteReceipt(receipt: Receipt)

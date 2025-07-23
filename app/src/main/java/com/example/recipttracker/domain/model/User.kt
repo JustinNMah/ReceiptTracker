@@ -9,5 +9,6 @@ data class User(
     @PrimaryKey val id: UUID = UUID.randomUUID(),
     val username: String,
     val hashedPassword: String,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val syncedWithCloud: Boolean = false
 )
