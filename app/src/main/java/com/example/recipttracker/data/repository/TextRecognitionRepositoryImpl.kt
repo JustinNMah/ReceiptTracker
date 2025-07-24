@@ -5,6 +5,7 @@ import com.example.recipttracker.domain.ocr.TextRecognitionRepository
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import generateBitmap
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -19,9 +20,9 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-    override suspend fun recognizeTextFromImage(imageData: ByteArray): ExtractionResult =
+    override suspend fun recognizeTextFromImage(filePath: String): ExtractionResult =
         suspendCancellableCoroutine { cont ->
-            val bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
+            val bitmap = generateBitmap(filePath)
             val image = InputImage.fromBitmap(bitmap, 0)
 
             recognizer.process(image)
@@ -54,7 +55,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
 
                     if (firstPriceY != null && totalLineY != null && totalLineY > firstPriceY) {
                         for ((text, y, _) in allLinesWithY) {
-                            if (y > firstPriceY - 10 && y < totalLineY + 10){
+                            if (y > firstPriceY - 10 && y < totalLineY + 30){
                                 if (priceRegex.containsMatchIn(text)) {
                                     total = text
                                 }

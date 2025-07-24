@@ -33,14 +33,12 @@ fun Processing(
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                val bitmap = BitmapFactory.decodeFile(
-                    modifyReceiptVM.filePath.value
-                )
-                val stream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                val imageData = stream.toByteArray()
+                val filePath = modifyReceiptVM.filePath.value
 
-                val result = repository.recognizeTextFromImage(imageData)
+                if (filePath.isNullOrEmpty()){
+                    throw IllegalStateException("File path not found")
+                }
+                val result = repository.recognizeTextFromImage(filePath)
 
                 val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val currentDateString = formatter.format(Date())
