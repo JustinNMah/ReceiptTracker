@@ -40,10 +40,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.ui.composed
-import androidx.compose.ui.platform.debugInspectorInfo
-import androidx.compose.ui.semantics.Role
 import com.example.recipttracker.R
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
@@ -52,7 +48,6 @@ import com.example.recipttracker.ViewModels.UserViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.filled.DateRange
 import generateBitmap
 
@@ -115,7 +110,6 @@ fun ModifyReceiptUI(
     var showDatePicker by remember { mutableStateOf(false) }
     val initialDateMillis = if (modifyReceiptVM.mode.value == Mode.EDIT) parseDateForPicker(modifyReceiptVM.date.value ?: "") else null
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialDateMillis)
-
 
     Scaffold(
         topBar = {
@@ -199,10 +193,9 @@ fun ModifyReceiptUI(
                     )
                 }
             )
-            OutlinedTextField(
-                value = category.value,
-                onValueChange = { category.value = it },
-                label = { Text("Category") },
+            AutoCompleteCategory(
+                categoryState = category,
+                suggestions = allCategories,
                 modifier = Modifier.padding(8.dp)
             )
             Row(

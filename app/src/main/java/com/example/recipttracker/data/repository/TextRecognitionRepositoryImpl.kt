@@ -27,6 +27,11 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
 
             recognizer.process(image)
                 .addOnSuccessListener { visionText ->
+                    if (visionText.textBlocks.isEmpty()) {
+                        cont.resume(ExtractionResult())
+                        return@addOnSuccessListener
+                    }
+
                     val priceRegex = Regex("""\$?\s*((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2}))""")
                     val totalRegex = Regex("total", RegexOption.IGNORE_CASE)
 
@@ -45,7 +50,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                         if (firstPriceY == null && priceRegex.containsMatchIn(text)) {
                             firstPriceY = y
                         }
-                        if (totalRegex.containsMatchIn(text)) {
+                        if (totalRegex.containsMatchIn(text) && firstPriceY != null) {
                             totalLineY = y
                         }
                     }
@@ -53,14 +58,12 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                     val collectedItems = mutableListOf<String>()
                     var total = ""
 
-                    if (firstPriceY != null && totalLineY != null && totalLineY > firstPriceY) {
-                        for ((text, y, _) in allLinesWithY) {
-                            if (y > firstPriceY - 10 && y < totalLineY + 30){
-                                if (priceRegex.containsMatchIn(text)) {
-                                    total = text
-                                }
-                                collectedItems.add(text)
+                    for ((text, y, _) in allLinesWithY) {
+                        if ((firstPriceY == null || y > firstPriceY - 10) && (totalLineY == null || y < totalLineY + 30)){
+                            if (priceRegex.containsMatchIn(text)) {
+                                total = text
                             }
+                            collectedItems.add(text)
                         }
                     }
 
@@ -75,7 +78,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                     cont.resume(ExtractionResult(
                         collectedItems = collectedItems,
                         total = amountNumber,
-                        title = allLinesWithY.get(0).first
+                        title = allLinesWithY[0].first
                     ))
                 }
                 .addOnFailureListener { exception ->
