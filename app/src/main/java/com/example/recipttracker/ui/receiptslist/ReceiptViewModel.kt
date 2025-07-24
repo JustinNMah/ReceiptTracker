@@ -116,12 +116,18 @@ class ReceiptViewModel @Inject constructor(
                 } else {
                     compareByDescending { it.category }
                 }
+                SortField.AMOUNT -> if (receiptSortOrder.isAscending) {
+                    compareBy { it.amount }
+                } else {
+                    compareByDescending { it.amount }
+                }
             }
         )
         val groupedReceipts = when(receiptSortOrder.field) {
             SortField.DATE -> sortedReceipts.groupBy { it.monthYear }
             SortField.STORE -> mapOf("" to sortedReceipts)
             SortField.CATEGORY -> sortedReceipts.groupBy { it.category }
+            SortField.AMOUNT -> mapOf("" to sortedReceipts)
         }
         _state.value = state.value.copy(
             receipts = groupedReceipts,
