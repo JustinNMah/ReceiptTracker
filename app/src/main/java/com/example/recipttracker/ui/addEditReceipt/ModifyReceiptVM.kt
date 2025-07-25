@@ -18,8 +18,8 @@ class ModifyReceiptVM(): ViewModel() {
     private var _date: MutableLiveData<String> = MutableLiveData<String>()
     val date: LiveData<String> = _date
 
-    private var _data: MutableLiveData<Set<String>> = MutableLiveData<Set<String>>()
-    val data: LiveData<Set<String>> = _data
+    private var _data: MutableLiveData<List<String>> = MutableLiveData<List<String>>()
+    val data: LiveData<List<String>> = _data
 
     private var _category: MutableLiveData<String> = MutableLiveData<String>()
     val category: LiveData<String> = _category
@@ -47,12 +47,12 @@ class ModifyReceiptVM(): ViewModel() {
         _store.value = ""
         _amount.value = ""
         _date.value = ""
-        _data.value = emptySet()
+        _data.value = emptyList()
         _category.value = ""
         _filePath.value = filePath
     }
 
-    fun editReceiptToAdd(store: String, amount: String, date: String, data: Set<String>) {
+    fun editReceiptToAdd(store: String, amount: String, date: String, data: List<String>) {
         _store.value = store
         _amount.value = amount
         _date.value = date

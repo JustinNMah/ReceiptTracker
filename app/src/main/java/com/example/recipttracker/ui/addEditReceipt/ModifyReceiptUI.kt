@@ -91,7 +91,7 @@ fun ModifyReceiptUI(
     val store: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.store.value!!) }
     val amount: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.amount.value!!) }
     val date: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.date.value!!) }
-    val data: MutableState<Set<String>> = remember { mutableStateOf(modifyReceiptVM.data.value!!) }
+    val data: MutableState<List<String>> = remember { mutableStateOf(modifyReceiptVM.data.value!!) }
     val category: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.category.value!!) }
     val filePath: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.filePath.value!!) }
 

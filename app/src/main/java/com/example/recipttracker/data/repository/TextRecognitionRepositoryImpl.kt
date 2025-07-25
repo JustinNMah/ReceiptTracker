@@ -10,7 +10,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 data class ExtractionResult(
-    val collectedItems: Set<String> = emptySet(),
+    val collectedItems: List<String> = emptyList(),
     val total: String = "",
     val title: String = ""
 )
@@ -57,7 +57,7 @@ class TextRecognitionRepositoryImpl : TextRecognitionRepository {
                         }
                     }
 
-                    val collectedItems = mutableSetOf<String>()
+                    val collectedItems = mutableListOf<String>()
                     var total = ""
 
                     for ((text, y, _) in allLinesWithY) {

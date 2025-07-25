@@ -18,7 +18,7 @@ data class Receipt(
     val category: String,
     val filePath: String,
     val syncedWithCloud: Boolean = false,
-    val data: Set<String> = emptySet(),
+    val data: List<String> = emptyList(),
 ) {
     // get month from dates
     val monthYear: String
