@@ -49,6 +49,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.material.icons.filled.DateRange
+import generateBitmap
 
 // Helper function to format date for display
 fun formatDateForDisplay(dateString: String): String {
@@ -96,7 +97,7 @@ fun ModifyReceiptUI(
     val filePath: MutableState<String> = remember { mutableStateOf(modifyReceiptVM.filePath.value!!) }
 
     val file = File(filePath.value)
-    val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+    val bitmap = generateBitmap(file.absolutePath)
 
     val validAmounts = Regex("^\\d*(\\.\\d{0,2})?$")
     val allCategories = receiptViewModel.state.value.receipts
