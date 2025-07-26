@@ -48,6 +48,7 @@ interface ReceiptDao {
     suspend fun getUnsyncedReceipts(): List<Receipt>
 
     @Query("SELECT COUNT(*) FROM receipt WHERE userId = :userId")
-    suspend fun getReceiptCount(userId: Int): Int
+    suspend fun getReceiptCount(userId: UUID): Int
+
 
 }
