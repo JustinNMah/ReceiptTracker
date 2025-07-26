@@ -32,6 +32,8 @@ import com.example.recipttracker.domain.event.UserEvent
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import androidx.compose.runtime.collectAsState
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +73,7 @@ fun ReceiptListScreen(
 
     val state = receiptViewModel.state.value
     val sortState = state.receiptSortOrder
+    val receiptCount by receiptViewModel.receiptCount
     val receipts = state.receipts
 
     var showFabMenu by remember { mutableStateOf(false) }
