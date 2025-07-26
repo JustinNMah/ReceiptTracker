@@ -96,8 +96,9 @@ class ReceiptRepositoryImpl(
         return dao.searchReceipts(userId, query)
     }
 
-    override suspend fun getReceiptCount(userId: Int): Int {
+    override suspend fun getReceiptCount(userId: UUID): Int {
         return dao.getReceiptCount(userId)
     }
+
 
 }
