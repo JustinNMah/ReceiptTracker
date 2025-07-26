@@ -182,6 +182,15 @@ fun ReceiptListScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
+                Text(
+                    text = "Showing $receiptCount receipt(s)",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    textAlign = TextAlign.Center
+                )
+
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
                         .fillMaxWidth()
