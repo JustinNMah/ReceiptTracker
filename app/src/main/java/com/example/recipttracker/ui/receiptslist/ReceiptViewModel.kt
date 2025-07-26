@@ -90,7 +90,7 @@ class ReceiptViewModel @Inject constructor(
                         event.category,
                         event.filePath
                     )
-                    userId?.let { updateReceiptCount(it) }
+                    userId?.let { updateReceiptCount(it) } //added the function
                 }
             }
         }
