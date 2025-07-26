@@ -27,8 +27,12 @@ class ReceiptViewModel @Inject constructor(
     private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
 
+    private val _receiptCount = mutableStateOf(0)
+    val receiptCount: State<Int> = _receiptCount
+
     private var getReceiptsCoroutine: Job? = null
     private var userId: UUID? = null
+
     init {
         getReceipts(_state.value.receiptSortOrder)
     }
@@ -36,11 +40,11 @@ class ReceiptViewModel @Inject constructor(
     fun setUser(userId: UUID) {
         this.userId = userId
         getReceipts(_state.value.receiptSortOrder)
+        updateReceiptCount(userId)
 
-        // Get cloud database receipts and check if any are not in the local database. Add different receipts to local database
         viewModelScope.launch {
             val cloudReceipts = getCloudReceipts(userId)
-            val localReceipts = _state.value.receipts.values.flatten() // Flatten the local database's Map<String, List<Receipt>> to a single list
+            val localReceipts = _state.value.receipts.values.flatten()
             val localIds = localReceipts.map { it.id }.toSet()
 
             val newCloudReceipts = cloudReceipts.filterNot { it.id in localIds }
@@ -51,11 +55,19 @@ class ReceiptViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: ReceiptsEvent) { // create an event when user changes Sort Order or Deletes Receipt.
+    private fun updateReceiptCount(userId: UUID) {
+        viewModelScope.launch {
+            val count = repository.getReceiptCount(userId)
+            _receiptCount.value = count
+        }
+    }
+
+    fun onEvent(event: ReceiptsEvent) {
         when(event) {
             is ReceiptsEvent.AddReceipt -> {
                 viewModelScope.launch {
                     repository.insertReceipt(event.receipt)
+                    updateReceiptCount(event.receipt.userId)
                 }
             }
             is ReceiptsEvent.Order -> {
@@ -65,6 +77,7 @@ class ReceiptViewModel @Inject constructor(
             is ReceiptsEvent.DeleteReceipt -> {
                 viewModelScope.launch {
                     repository.deleteReceipt(event.receipt)
+                    updateReceiptCount(event.receipt.userId)
                 }
             }
             is ReceiptsEvent.ModifyReceipt -> {
@@ -77,6 +90,7 @@ class ReceiptViewModel @Inject constructor(
                         event.category,
                         event.filePath
                     )
+                    userId?.let { updateReceiptCount(it) }
                 }
             }
         }
@@ -89,8 +103,6 @@ class ReceiptViewModel @Inject constructor(
         }
 
         getReceiptsCoroutine?.cancel()
-        println("In getReceipts")
-
         getReceiptsCoroutine = repository.getReceipts(uid)
             .onEach { receipts ->
                 sortReceipts(receipts, receiptSortOrder)
@@ -143,7 +155,6 @@ class ReceiptViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
     }
-
 }
 
 private suspend fun getCloudReceipts(userId: UUID) : List<Receipt> {
