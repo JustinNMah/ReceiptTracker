@@ -22,6 +22,6 @@ interface ReceiptRepository {
 
     suspend fun getUnsyncedReceipts() : List<Receipt>
 
-    suspend fun getReceiptCount(userId: Int): Int
+    suspend fun getReceiptCount(userId: UUID): Int
 
 }
