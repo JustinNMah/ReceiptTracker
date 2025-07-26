@@ -100,5 +100,10 @@ class ReceiptRepositoryImpl(
         return dao.getReceiptCount(userId)
     }
 
+    override suspend fun getMonthlyTotal(userId: UUID): Float {
+        return dao.getMonthlyTotal(userId) ?: 0f
+    }
+
+
 
 }

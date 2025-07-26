@@ -30,6 +30,10 @@ class ReceiptViewModel @Inject constructor(
     private val _receiptCount = mutableStateOf(0)
     val receiptCount: State<Int> = _receiptCount
 
+    private val _monthlyTotal = mutableStateOf(0f)
+    val monthlyTotal: State<Float> = _monthlyTotal
+
+
     private var getReceiptsCoroutine: Job? = null
     private var userId: UUID? = null
 
@@ -41,6 +45,7 @@ class ReceiptViewModel @Inject constructor(
         this.userId = userId
         getReceipts(_state.value.receiptSortOrder)
         updateReceiptCount(userId)
+        updateMonthlyTotal(userId)
 
         viewModelScope.launch {
             val cloudReceipts = getCloudReceipts(userId)
@@ -155,6 +160,14 @@ class ReceiptViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
     }
+
+    fun updateMonthlyTotal(userId: UUID) {
+        viewModelScope.launch {
+            val total = repository.getMonthlyTotal(userId)
+            _monthlyTotal.value = total
+        }
+    }
+
 }
 
 private suspend fun getCloudReceipts(userId: UUID) : List<Receipt> {

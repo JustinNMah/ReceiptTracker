@@ -191,6 +191,14 @@ fun ReceiptListScreen(
                     textAlign = TextAlign.Center
                 )
 
+                Text(
+                    text = "Total Spent This Month: $${String.format("%.2f", receiptViewModel.monthlyTotal.value)}",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
                         .fillMaxWidth()
