@@ -50,5 +50,14 @@ interface ReceiptDao {
     @Query("SELECT COUNT(*) FROM receipt WHERE userId = :userId")
     suspend fun getReceiptCount(userId: UUID): Int
 
+    @Query("""
+    SELECT SUM(CAST(amount AS FLOAT)) 
+    FROM receipt 
+    WHERE userId = :userId 
+    AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')
+""")
+    suspend fun getMonthlyTotal(userId: UUID): Float?
+
+
 
 }
