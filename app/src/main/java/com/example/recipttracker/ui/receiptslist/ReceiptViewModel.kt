@@ -30,6 +30,10 @@ class ReceiptViewModel @Inject constructor(
     private val _receiptCount = mutableStateOf(0)
     val receiptCount: State<Int> = _receiptCount
 
+    private val _monthlyTotal = mutableStateOf(0f)
+    val monthlyTotal: State<Float> = _monthlyTotal
+
+
     private var getReceiptsCoroutine: Job? = null
     private var userId: UUID? = null
 
