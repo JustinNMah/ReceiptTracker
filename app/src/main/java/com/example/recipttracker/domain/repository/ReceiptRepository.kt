@@ -24,4 +24,7 @@ interface ReceiptRepository {
 
     suspend fun getReceiptCount(userId: UUID): Int
 
+    suspend fun getMonthlyTotal(userId: UUID): Float
+
+
 }
