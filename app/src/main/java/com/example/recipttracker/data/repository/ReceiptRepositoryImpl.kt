@@ -95,4 +95,9 @@ class ReceiptRepositoryImpl(
     override fun searchReceipts(userId: UUID, query: String): Flow<List<Receipt>> {
         return dao.searchReceipts(userId, query)
     }
+
+    override suspend fun getReceiptCount(userId: Int): Int {
+        return dao.getReceiptCount(userId)
+    }
+
 }
