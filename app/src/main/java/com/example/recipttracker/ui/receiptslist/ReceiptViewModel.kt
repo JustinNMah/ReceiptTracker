@@ -159,6 +159,14 @@ class ReceiptViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
     }
+
+    fun updateMonthlyTotal(userId: UUID) {
+        viewModelScope.launch {
+            val total = repository.getMonthlyTotal(userId)
+            _monthlyTotal.value = total
+        }
+    }
+
 }
 
 private suspend fun getCloudReceipts(userId: UUID) : List<Receipt> {
