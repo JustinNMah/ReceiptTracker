@@ -45,6 +45,7 @@ class ReceiptViewModel @Inject constructor(
         this.userId = userId
         getReceipts(_state.value.receiptSortOrder)
         updateReceiptCount(userId)
+        updateMonthlyTotal(userId)
 
         viewModelScope.launch {
             val cloudReceipts = getCloudReceipts(userId)
