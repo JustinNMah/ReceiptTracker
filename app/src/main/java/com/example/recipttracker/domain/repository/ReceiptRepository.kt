@@ -21,4 +21,7 @@ interface ReceiptRepository {
     fun searchReceipts(userId: UUID, query: String): Flow<List<Receipt>>
 
     suspend fun getUnsyncedReceipts() : List<Receipt>
+
+    suspend fun getReceiptCount(userId: UUID): Int
+
 }
