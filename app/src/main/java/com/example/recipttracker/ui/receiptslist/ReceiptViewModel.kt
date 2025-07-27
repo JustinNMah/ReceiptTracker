@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.state.ReceiptsListState
 import com.example.recipttracker.domain.repository.ReceiptRepository
+import com.example.recipttracker.domain.repository.UserRepository
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,16 +20,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import java.util.UUID
-import com.example.recipttracker.domain.repository.SettingsRepository
-import com.example.recipttracker.data.repository.SettingsRepositoryImpl
-import com.example.recipttracker.domain.model.Settings
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 @HiltViewModel
 class ReceiptViewModel @Inject constructor(
     private val repository: ReceiptRepository,
-    private val settingsRepository: SettingsRepository
+    private val userRepository: UserRepository
 ): ViewModel() {
     private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
@@ -61,6 +57,7 @@ class ReceiptViewModel @Inject constructor(
         updateReceiptCount(userId)
         updateMonthlyTotal(userId)
 
+        // Load settings after userId is set
         loadSettings(userId)
 
         viewModelScope.launch {
@@ -138,10 +135,11 @@ class ReceiptViewModel @Inject constructor(
 
                 // Save to database
                 try {
-                    settingsRepository.updateEnabledSortFields(currentUserId, currentFields)
+                    userRepository.updateEnabledSortFields(currentUserId, currentFields)
                     Log.d("ReceiptViewModel", "Settings saved: $currentFields")
                 } catch (e: Exception) {
                     Log.e("ReceiptViewModel", "Error saving settings", e)
+                    // Revert the UI change on error
                     if (currentFields.contains(sortField)) {
                         currentFields.remove(sortField)
                     } else {
@@ -256,21 +254,9 @@ class ReceiptViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 Log.d("ReceiptViewModel", "Loading settings for user: $userId")
-                val settings = settingsRepository.getSettingsByUserId(userId)
-                if (settings != null) {
-                    Log.d("ReceiptViewModel", "Found settings: ${settings.enabledSortFields}")
-                    val sortFields = SettingsRepositoryImpl.parseEnabledSortFields(settings.enabledSortFields)
-                    _enabledSortFields.value = sortFields
-                    Log.d("ReceiptViewModel", "Loaded sort fields: $sortFields")
-                } else {
-                    Log.d("ReceiptViewModel", "No settings found, creating defaults")
-                    val defaultSettings = Settings(
-                        userId = userId,
-                        enabledSortFields = Json.encodeToString(SortField.entries.map { it.name })
-                    )
-                    settingsRepository.insertSettings(defaultSettings)
-                    _enabledSortFields.value = SortField.entries.toSet()
-                }
+                val sortFields = userRepository.getEnabledSortFields(userId)
+                _enabledSortFields.value = sortFields
+                Log.d("ReceiptViewModel", "Loaded sort fields: $sortFields")
             } catch (e: Exception) {
                 Log.e("ReceiptViewModel", "Error loading settings", e)
                 _enabledSortFields.value = SortField.entries.toSet()

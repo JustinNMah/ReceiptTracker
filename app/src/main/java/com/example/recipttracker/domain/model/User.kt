@@ -10,5 +10,7 @@ data class User(
     val username: String,
     val hashedPassword: String,
     val createdAt: Long = System.currentTimeMillis(),
-    val syncedWithCloud: Boolean = false
+    val syncedWithCloud: Boolean = false,
+    val enabledSortFields: String = "",
+    val updatedAt: Long = System.currentTimeMillis()
 )
