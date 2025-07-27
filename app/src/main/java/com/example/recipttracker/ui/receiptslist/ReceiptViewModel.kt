@@ -120,6 +120,14 @@ class ReceiptViewModel @Inject constructor(
             .onEach { receipts ->
                 sortReceipts(receipts, receiptSortOrder)
                 _categoryCount.value = receipts.map { it.category }.distinct().count()
+
+                val mostVisited = receipts
+                    .groupingBy { it.store }
+                    .eachCount()
+                    .maxByOrNull { it.value }
+
+                _mostVisitedStore.value = mostVisited
+
             }
             .launchIn(viewModelScope)
     }
@@ -167,6 +175,7 @@ class ReceiptViewModel @Inject constructor(
             .onEach { receipts ->
                 sortReceipts(receipts, _state.value.receiptSortOrder)
                 _categoryCount.value = receipts.map { it.category }.distinct().count()
+
 
             }
             .launchIn(viewModelScope)
