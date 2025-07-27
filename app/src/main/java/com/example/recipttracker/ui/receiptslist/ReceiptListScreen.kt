@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -221,13 +222,17 @@ fun ReceiptListScreen(
                             shape = SegmentedButtonDefaults.itemShape(
                                 index = index,
                                 count = SortField.entries.size
-                            )
+                            ),
+                            icon = { }
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Text(option.toString())
+                                Text(
+                                    option.toString(),
+                                    fontSize = 12.sp
+                                )
                                 if (sortState.field == option) {
                                     Icon(
                                         imageVector = if (sortState.isAscending) {
