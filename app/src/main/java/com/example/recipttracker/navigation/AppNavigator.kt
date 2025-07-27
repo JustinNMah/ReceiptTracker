@@ -30,7 +30,7 @@ fun AppNavigator() {
     NavHost(navController = navController, startDestination = startDestination) {
         composable("landing") {
             LandingScreen(
-                onLogin = { navController.navigate("receipts?fromLogin=true") },
+                onLogin = { navController.navigate("login") },
                 onSignUp = { navController.navigate("signup") }
             )
         }
@@ -43,7 +43,7 @@ fun AppNavigator() {
         }
         composable("signup"){
             SignUpScreen(
-                onEnter = { navController.navigate("receipts") },
+                onEnter = { navController.navigate("receipts?fromLogin=true") },
                 onBack = { navController.navigate("landing") },
                 userViewModel = userViewModel,
             )
