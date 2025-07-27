@@ -3,7 +3,8 @@ package com.example.recipttracker.domain.util
 enum class SortField {
     DATE,
     STORE,
-    CATEGORY
+    CATEGORY,
+    AMOUNT
 }
 
 data class ReceiptSortOrder(

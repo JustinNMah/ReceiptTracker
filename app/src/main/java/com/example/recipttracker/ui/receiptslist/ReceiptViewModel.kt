@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.recipttracker.domain.model.Receipt
 import com.example.recipttracker.domain.state.ReceiptsListState
 import com.example.recipttracker.domain.repository.ReceiptRepository
+import com.example.recipttracker.domain.repository.UserRepository
 import com.example.recipttracker.domain.util.ReceiptSortOrder
 import com.example.recipttracker.domain.util.SortField
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,7 +23,8 @@ import java.util.UUID
 
 @HiltViewModel
 class ReceiptViewModel @Inject constructor(
-    private val repository: ReceiptRepository
+    private val repository: ReceiptRepository,
+    private val userRepository: UserRepository
 ): ViewModel() {
     private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
@@ -39,8 +41,8 @@ class ReceiptViewModel @Inject constructor(
     private val _mostVisitedStore = mutableStateOf<Pair<String, Int>?>(null)
     val mostVisitedStore: State<Pair<String, Int>?> = _mostVisitedStore
 
-
-
+    private val _enabledSortFields = mutableStateOf(SortField.entries.toSet())
+    val enabledSortFields: State<Set<SortField>> = _enabledSortFields
 
     private var getReceiptsCoroutine: Job? = null
     private var userId: UUID? = null
@@ -54,6 +56,9 @@ class ReceiptViewModel @Inject constructor(
         getReceipts(_state.value.receiptSortOrder)
         updateReceiptCount(userId)
         updateMonthlyTotal(userId)
+
+        // Load settings after userId is set
+        loadSettings(userId)
 
         viewModelScope.launch {
             val cloudReceipts = getCloudReceipts(userId)
@@ -103,7 +108,55 @@ class ReceiptViewModel @Inject constructor(
                         event.category,
                         event.filePath
                     )
-                    userId?.let { updateReceiptCount(it) } //added the function
+                    userId?.let { updateReceiptCount(it) }
+                }
+            }
+        }
+    }
+
+    fun toggleSortField(sortField: SortField) {
+        val currentUserId = userId ?: run {
+            Log.e("ReceiptViewModel", "toggleSortField: userId is null")
+            return
+        }
+
+        viewModelScope.launch {
+            val currentFields = _enabledSortFields.value.toMutableSet()
+
+            // Ensure at least one field remains enabled
+            if (currentFields.size > 1 || !currentFields.contains(sortField)) {
+                if (currentFields.contains(sortField)) {
+                    currentFields.remove(sortField)
+                } else {
+                    currentFields.add(sortField)
+                }
+
+                _enabledSortFields.value = currentFields
+
+                // Save to database
+                try {
+                    userRepository.updateEnabledSortFields(currentUserId, currentFields)
+                    Log.d("ReceiptViewModel", "Settings saved: $currentFields")
+                } catch (e: Exception) {
+                    Log.e("ReceiptViewModel", "Error saving settings", e)
+                    // Revert the UI change on error
+                    if (currentFields.contains(sortField)) {
+                        currentFields.remove(sortField)
+                    } else {
+                        currentFields.add(sortField)
+                    }
+                    _enabledSortFields.value = currentFields
+                }
+
+                // Update current sort if needed
+                val currentSortField = _state.value.receiptSortOrder.field
+                if (!currentFields.contains(currentSortField)) {
+                    val newSortField = currentFields.first()
+                    val newSortOrder = ReceiptSortOrder(
+                        field = newSortField,
+                        isAscending = if (newSortField == SortField.DATE) false else true
+                    )
+                    onEvent(ReceiptsEvent.Order(newSortOrder))
                 }
             }
         }
@@ -127,8 +180,6 @@ class ReceiptViewModel @Inject constructor(
                     .maxByOrNull { it.value }
 
                 _mostVisitedStore.value = mostVisitedEntry?.let { Pair(it.key, it.value) }
-
-
             }
             .launchIn(viewModelScope)
     }
@@ -151,12 +202,18 @@ class ReceiptViewModel @Inject constructor(
                 } else {
                     compareByDescending { it.category }
                 }
+                SortField.AMOUNT -> if (receiptSortOrder.isAscending) {
+                    compareBy { it.amount }
+                } else {
+                    compareByDescending { it.amount }
+                }
             }
         )
         val groupedReceipts = when(receiptSortOrder.field) {
             SortField.DATE -> sortedReceipts.groupBy { it.monthYear }
             SortField.STORE -> mapOf("" to sortedReceipts)
             SortField.CATEGORY -> sortedReceipts.groupBy { it.category }
+            SortField.AMOUNT -> mapOf("" to sortedReceipts)
         }
         _state.value = state.value.copy(
             receipts = groupedReceipts,
@@ -182,8 +239,6 @@ class ReceiptViewModel @Inject constructor(
                     .maxByOrNull { it.value }
 
                 _mostVisitedStore.value = mostVisitedEntry?.let { Pair(it.key, it.value) }
-
-
             }
             .launchIn(viewModelScope)
     }
@@ -195,6 +250,19 @@ class ReceiptViewModel @Inject constructor(
         }
     }
 
+    private fun loadSettings(userId: UUID) {
+        viewModelScope.launch {
+            try {
+                Log.d("ReceiptViewModel", "Loading settings for user: $userId")
+                val sortFields = userRepository.getEnabledSortFields(userId)
+                _enabledSortFields.value = sortFields
+                Log.d("ReceiptViewModel", "Loaded sort fields: $sortFields")
+            } catch (e: Exception) {
+                Log.e("ReceiptViewModel", "Error loading settings", e)
+                _enabledSortFields.value = SortField.entries.toSet()
+            }
+        }
+    }
 }
 
 private suspend fun getCloudReceipts(userId: UUID) : List<Receipt> {

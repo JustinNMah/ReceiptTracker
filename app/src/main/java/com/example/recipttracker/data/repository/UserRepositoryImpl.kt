@@ -12,8 +12,10 @@ import com.example.recipttracker.domain.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import at.favre.lib.crypto.bcrypt.BCrypt
 import com.example.recipttracker.data.workers.UserSyncWorker
+import com.example.recipttracker.domain.util.SortField
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import kotlinx.serialization.json.Json
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -125,6 +127,34 @@ class UserRepositoryImpl(
 
     override suspend fun getUserById(id: UUID): User? {
         return userDao.getUserById(id)
+    }
+
+    override suspend fun getEnabledSortFields(userId: UUID): Set<SortField> {
+        val json = userDao.getEnabledSortFields(userId)
+        return if (json.isNullOrEmpty()) {
+            SortField.entries.toSet()
+        } else {
+            parseEnabledSortFields(json)
+        }
+    }
+
+    override suspend fun updateEnabledSortFields(userId: UUID, enabledSortFields: Set<SortField>) {
+        val sortFieldNames = enabledSortFields.map { it.name }
+        val json = Json.encodeToString(sortFieldNames)
+        userDao.updateEnabledSortFields(userId, json, System.currentTimeMillis())
+    }
+
+    companion object {
+        fun parseEnabledSortFields(json: String): Set<SortField> {
+            return try {
+                val sortFieldNames = Json.decodeFromString<List<String>>(json)
+                sortFieldNames.mapNotNull { name ->
+                    SortField.entries.find { it.name == name }
+                }.toSet()
+            } catch (e: Exception) {
+                SortField.entries.toSet()
+            }
+        }
     }
 
 }

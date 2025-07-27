@@ -10,6 +10,7 @@ import com.example.recipttracker.ui.signup.SignUpScreen
 import com.example.recipttracker.ui.addEditReceipt.Camera
 import com.example.recipttracker.ui.addEditReceipt.CameraRoll
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
+import com.example.recipttracker.ui.settings.SettingsScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptUI
@@ -52,6 +53,7 @@ fun AppNavigator() {
                 onUpload = { navController.navigate("cameraRoll") },
                 onLogout = { navController.navigate("landing") },
                 onView = { navController.navigate("viewReceipt") },
+                onSettings = { navController.navigate("settings") },
                 receiptViewModel = receiptViewModel,
                 userViewModel = userViewModel,
                 modifyReceiptVM = modifyReceiptVM
@@ -92,6 +94,12 @@ fun AppNavigator() {
                 modifyReceiptVM = modifyReceiptVM,
                 receiptViewModel = receiptViewModel,
                 userViewModel = userViewModel
+            )
+        }
+        composable("settings") {
+            SettingsScreen(
+                onBack = { navController.navigate("receipts") },
+                receiptViewModel = receiptViewModel
             )
         }
     }

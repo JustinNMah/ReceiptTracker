@@ -43,6 +43,7 @@ object AppModule {
             UserDatabase.DATABASE_NAME
         ).build()
     }
+
     @Provides
     @Singleton
     fun provideUserRepository(db: UserDatabase, app: Application): UserRepository {

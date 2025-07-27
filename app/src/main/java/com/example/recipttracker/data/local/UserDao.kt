@@ -25,4 +25,10 @@ interface UserDao {
 
     @Query("SELECT * FROM user WHERE syncedWithCloud = 0")
     suspend fun getUnsyncedUsers(): List<User>
+
+    @Query("UPDATE user SET enabledSortFields = :enabledSortFields, updatedAt = :updatedAt WHERE id = :userId")
+    suspend fun updateEnabledSortFields(userId: UUID, enabledSortFields: String, updatedAt: Long)
+
+    @Query("SELECT enabledSortFields FROM user WHERE id = :userId LIMIT 1")
+    suspend fun getEnabledSortFields(userId: UUID): String?
 }

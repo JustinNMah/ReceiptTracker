@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -32,7 +33,6 @@ import com.example.recipttracker.domain.event.UserEvent
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import androidx.compose.runtime.collectAsState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +42,7 @@ fun ReceiptListScreen(
     onUpload: () -> Unit,
     onLogout: () -> Unit,
     onView: () -> Unit,
+    onSettings: () -> Unit,
     receiptViewModel: ReceiptViewModel,
     userViewModel: UserViewModel,
     modifyReceiptVM: ModifyReceiptVM
@@ -57,10 +58,7 @@ fun ReceiptListScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var searchQuery by remember { mutableStateOf("") }
     val userId = userViewModel.state.value.user?.id
-    val categoryCount by receiptViewModel.categoryCount
-    val mostVisitedStore by receiptViewModel.mostVisitedStore
-
-
+    val enabledSortFields by receiptViewModel.enabledSortFields
 
     LaunchedEffect(userId) {
         snapshotFlow { searchQuery }
@@ -77,7 +75,6 @@ fun ReceiptListScreen(
 
     val state = receiptViewModel.state.value
     val sortState = state.receiptSortOrder
-    val receiptCount by receiptViewModel.receiptCount
     val receipts = state.receipts
 
     var showFabMenu by remember { mutableStateOf(false) }
@@ -90,6 +87,17 @@ fun ReceiptListScreen(
                     text = "Menu",
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(16.dp)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            onSettings()
+                            drawerState.close()
+                        }
+                    }
                 )
 
                 NavigationDrawerItem(
@@ -186,86 +194,54 @@ fun ReceiptListScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                Text(
-                    text = "Showing $receiptCount receipt(s)",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    textAlign = TextAlign.Center
-                )
+                val enabledFields = enabledSortFields.toList()
 
-                Text(
-                    text = "Total Spent This Month: $${String.format("%.2f", receiptViewModel.monthlyTotal.value)}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "You have logged receipts across $categoryCount categor${if (categoryCount == 1) "y" else "ies"}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                mostVisitedStore?.let { (store, count) ->
-                    Text(
-                        text = "Most visited store: $store ($count receipts)",
-                        style = MaterialTheme.typography.titleMedium,
+                if (enabledFields.isNotEmpty()) {
+                    SingleChoiceSegmentedButtonRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-
-
-                SingleChoiceSegmentedButtonRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    SortField.entries.forEachIndexed { index, option ->
-                        SegmentedButton(
-                            selected = sortState.field == option,
-                            onClick = {
-                                val newSortState: ReceiptSortOrder = if (sortState.field == option) {
-                                    sortState.copy(isAscending = !sortState.isAscending)
-                                } else {
-                                    if (option == SortField.DATE) {
-                                        ReceiptSortOrder(option, isAscending = false)
+                            .padding(16.dp)
+                    ) {
+                        enabledFields.forEachIndexed { index, option ->
+                            SegmentedButton(
+                                selected = sortState.field == option,
+                                onClick = {
+                                    val newSortState: ReceiptSortOrder = if (sortState.field == option) {
+                                        sortState.copy(isAscending = !sortState.isAscending)
                                     } else {
-                                        ReceiptSortOrder(option, isAscending = true)
-                                    }
-                                }
-                                receiptViewModel.onEvent(ReceiptsEvent.Order(newSortState))
-                            },
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = SortField.entries.size
-                            )
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(option.toString())
-                                if (sortState.field == option) {
-                                    Icon(
-                                        imageVector = if (sortState.isAscending) {
-                                            Icons.Default.KeyboardArrowUp
+                                        if (option == SortField.DATE) {
+                                            ReceiptSortOrder(option, isAscending = false)
                                         } else {
-                                            Icons.Default.KeyboardArrowDown
-                                        },
-                                        contentDescription = if (sortState.isAscending) "Ascending" else "Descending",
-                                        modifier = Modifier.size(16.dp)
+                                            ReceiptSortOrder(option, isAscending = true)
+                                        }
+                                    }
+                                    receiptViewModel.onEvent(ReceiptsEvent.Order(newSortState))
+                                },
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = index,
+                                    count = enabledFields.size
+                                ),
+                                icon = { }
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        option.toString(),
+                                        fontSize = 12.sp
                                     )
+                                    if (sortState.field == option) {
+                                        Icon(
+                                            imageVector = if (sortState.isAscending) {
+                                                Icons.Default.KeyboardArrowUp
+                                            } else {
+                                                Icons.Default.KeyboardArrowDown
+                                            },
+                                            contentDescription = if (sortState.isAscending) "Ascending" else "Descending",
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -292,7 +268,7 @@ fun ReceiptListScreen(
                             }
                         }
                         items(items) { receipt ->
-                            ReceiptListItem(onView, receipt, modifyReceiptVM) // might have to change later. this drilling is probably bad design
+                            ReceiptListItem(onView, receipt, modifyReceiptVM)
                         }
                     }
                 }
@@ -307,7 +283,6 @@ fun ReceiptListItem(
     receipt: Receipt,
     modifyReceiptVM: ModifyReceiptVM
 ) {
-    var showModifyMenu by remember { mutableStateOf(false) }
     val cardShape = RoundedCornerShape(12.dp)
     Card(
         modifier = Modifier
