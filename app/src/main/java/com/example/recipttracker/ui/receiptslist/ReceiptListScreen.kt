@@ -213,6 +213,18 @@ fun ReceiptListScreen(
                     textAlign = TextAlign.Center
                 )
 
+                mostVisitedStore?.let { (store, count) ->
+                    Text(
+                        text = "Most visited store: $store ($count receipts)",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+
 
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
