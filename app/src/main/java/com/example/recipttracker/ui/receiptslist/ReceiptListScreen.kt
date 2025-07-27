@@ -45,13 +45,17 @@ fun ReceiptListScreen(
     onSettings: () -> Unit,
     receiptViewModel: ReceiptViewModel,
     userViewModel: UserViewModel,
-    modifyReceiptVM: ModifyReceiptVM
+    modifyReceiptVM: ModifyReceiptVM,
+    updateReceiptsFromCloud: Boolean
 ) {
     LaunchedEffect(Unit) {
         snapshotFlow { userViewModel.state.value.user }
             .collectLatest { user ->
                 if (user != null) {
                     receiptViewModel.setUser(user.id)
+                    if (updateReceiptsFromCloud) {
+                        receiptViewModel.updateReceiptsFromCloud(user.id)
+                    }
                 }
             }
     }
