@@ -36,6 +36,10 @@ class ReceiptViewModel @Inject constructor(
     private val _categoryCount = mutableStateOf(0)
     val categoryCount: State<Int> = _categoryCount
 
+    private val _mostVisitedStore = mutableStateOf<Pair<String, Int>?>(null)
+    val mostVisitedStore: State<Pair<String, Int>?> = _mostVisitedStore
+
+
 
 
     private var getReceiptsCoroutine: Job? = null
@@ -116,6 +120,15 @@ class ReceiptViewModel @Inject constructor(
             .onEach { receipts ->
                 sortReceipts(receipts, receiptSortOrder)
                 _categoryCount.value = receipts.map { it.category }.distinct().count()
+
+                val mostVisitedEntry = receipts
+                    .groupingBy { it.store }
+                    .eachCount()
+                    .maxByOrNull { it.value }
+
+                _mostVisitedStore.value = mostVisitedEntry?.let { Pair(it.key, it.value) }
+
+
             }
             .launchIn(viewModelScope)
     }
@@ -163,6 +176,13 @@ class ReceiptViewModel @Inject constructor(
             .onEach { receipts ->
                 sortReceipts(receipts, _state.value.receiptSortOrder)
                 _categoryCount.value = receipts.map { it.category }.distinct().count()
+                val mostVisitedEntry = receipts
+                    .groupingBy { it.store }
+                    .eachCount()
+                    .maxByOrNull { it.value }
+
+                _mostVisitedStore.value = mostVisitedEntry?.let { Pair(it.key, it.value) }
+
 
             }
             .launchIn(viewModelScope)
