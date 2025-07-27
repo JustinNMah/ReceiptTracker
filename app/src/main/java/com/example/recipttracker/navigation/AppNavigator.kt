@@ -12,6 +12,7 @@ import com.example.recipttracker.ui.addEditReceipt.CameraRoll
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptVM
 import com.example.recipttracker.ui.settings.SettingsScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.navArgument
 import com.example.recipttracker.ui.receiptslist.ReceiptViewModel
 import com.example.recipttracker.ui.addEditReceipt.ModifyReceiptUI
 import com.example.recipttracker.ViewModels.UserViewModel
@@ -29,13 +30,13 @@ fun AppNavigator() {
     NavHost(navController = navController, startDestination = startDestination) {
         composable("landing") {
             LandingScreen(
-                onLogin = { navController.navigate("login") },
+                onLogin = { navController.navigate("receipts?fromLogin=true") },
                 onSignUp = { navController.navigate("signup") }
             )
         }
         composable("login"){
             LoginScreen(
-                onEnter = { navController.navigate("receipts") },
+                onEnter = { navController.navigate("receipts?fromLogin=true") },
                 onBack = { navController.navigate("landing") },
                 userViewModel = userViewModel,
             )
@@ -47,7 +48,14 @@ fun AppNavigator() {
                 userViewModel = userViewModel,
             )
         }
-        composable("receipts") {
+        composable(
+            "receipts?fromLogin={fromLogin}",
+            arguments = listOf(
+                navArgument("fromLogin") { defaultValue = "false" },
+            )
+        ) { backStackEntry ->
+            val fromLogin = backStackEntry.arguments?.getString("fromLogin")?.toBoolean() ?: false
+
             ReceiptListScreen(
                 onCapture = { navController.navigate("camera") },
                 onUpload = { navController.navigate("cameraRoll") },
@@ -56,7 +64,8 @@ fun AppNavigator() {
                 onSettings = { navController.navigate("settings") },
                 receiptViewModel = receiptViewModel,
                 userViewModel = userViewModel,
-                modifyReceiptVM = modifyReceiptVM
+                modifyReceiptVM = modifyReceiptVM,
+                updateReceiptsFromCloud = fromLogin
             )
         }
         composable("viewReceipt") {

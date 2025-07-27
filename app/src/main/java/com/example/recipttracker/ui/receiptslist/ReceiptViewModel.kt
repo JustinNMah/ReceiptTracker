@@ -59,7 +59,10 @@ class ReceiptViewModel @Inject constructor(
 
         // Load settings after userId is set
         loadSettings(userId)
+    }
 
+    fun updateReceiptsFromCloud(userId: UUID) {
+        // Get cloud database receipts and check if any are not in the local database. Add different receipts to local database
         viewModelScope.launch {
             val cloudReceipts = getCloudReceipts(userId)
             val localReceipts = _state.value.receipts.values.flatten()
