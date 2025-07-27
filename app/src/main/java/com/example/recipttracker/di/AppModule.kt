@@ -3,10 +3,13 @@ package com.example.recipttracker.di
 import android.app.Application
 import androidx.room.Room
 import com.example.recipttracker.data.local.ReceiptDatabase
+import com.example.recipttracker.data.local.SettingsDatabase
 import com.example.recipttracker.data.local.UserDatabase
 import com.example.recipttracker.data.repository.ReceiptRepositoryImpl
+import com.example.recipttracker.data.repository.SettingsRepositoryImpl
 import com.example.recipttracker.data.repository.UserRepositoryImpl
 import com.example.recipttracker.domain.repository.ReceiptRepository
+import com.example.recipttracker.domain.repository.SettingsRepository
 import com.example.recipttracker.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -43,9 +46,26 @@ object AppModule {
             UserDatabase.DATABASE_NAME
         ).build()
     }
+
     @Provides
     @Singleton
     fun provideUserRepository(db: UserDatabase, app: Application): UserRepository {
         return UserRepositoryImpl(db.userDao, app.applicationContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettingsDatabase(app: Application): SettingsDatabase {
+        return Room.databaseBuilder(
+            app,
+            SettingsDatabase::class.java,
+            SettingsDatabase.DATABASE_NAME
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettingsRepository(db: SettingsDatabase): SettingsRepository {
+        return SettingsRepositoryImpl(db.settingsDao)
     }
 }

@@ -19,10 +19,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import java.util.UUID
+import com.example.recipttracker.domain.repository.SettingsRepository
+import com.example.recipttracker.data.repository.SettingsRepositoryImpl
+import com.example.recipttracker.domain.model.Settings
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @HiltViewModel
 class ReceiptViewModel @Inject constructor(
-    private val repository: ReceiptRepository
+    private val repository: ReceiptRepository,
+    private val settingsRepository: SettingsRepository
 ): ViewModel() {
     private val _state = mutableStateOf(ReceiptsListState())
     val state: State<ReceiptsListState> = _state
@@ -54,6 +60,8 @@ class ReceiptViewModel @Inject constructor(
         getReceipts(_state.value.receiptSortOrder)
         updateReceiptCount(userId)
         updateMonthlyTotal(userId)
+
+        loadSettings(userId)
 
         viewModelScope.launch {
             val cloudReceipts = getCloudReceipts(userId)
@@ -110,24 +118,48 @@ class ReceiptViewModel @Inject constructor(
     }
 
     fun toggleSortField(sortField: SortField) {
-        val currentFields = _enabledSortFields.value.toMutableSet()
+        val currentUserId = userId ?: run {
+            Log.e("ReceiptViewModel", "toggleSortField: userId is null")
+            return
+        }
 
-        if (currentFields.size > 1 || !currentFields.contains(sortField)) {
-            if (currentFields.contains(sortField)) {
-                currentFields.remove(sortField)
-            } else {
-                currentFields.add(sortField)
-            }
-            _enabledSortFields.value = currentFields
+        viewModelScope.launch {
+            val currentFields = _enabledSortFields.value.toMutableSet()
 
-            val currentSortField = _state.value.receiptSortOrder.field
-            if (!currentFields.contains(currentSortField)) {
-                val newSortField = currentFields.first()
-                val newSortOrder = ReceiptSortOrder(
-                    field = newSortField,
-                    isAscending = if (newSortField == SortField.DATE) false else true
-                )
-                onEvent(ReceiptsEvent.Order(newSortOrder))
+            // Ensure at least one field remains enabled
+            if (currentFields.size > 1 || !currentFields.contains(sortField)) {
+                if (currentFields.contains(sortField)) {
+                    currentFields.remove(sortField)
+                } else {
+                    currentFields.add(sortField)
+                }
+
+                _enabledSortFields.value = currentFields
+
+                // Save to database
+                try {
+                    settingsRepository.updateEnabledSortFields(currentUserId, currentFields)
+                    Log.d("ReceiptViewModel", "Settings saved: $currentFields")
+                } catch (e: Exception) {
+                    Log.e("ReceiptViewModel", "Error saving settings", e)
+                    if (currentFields.contains(sortField)) {
+                        currentFields.remove(sortField)
+                    } else {
+                        currentFields.add(sortField)
+                    }
+                    _enabledSortFields.value = currentFields
+                }
+
+                // Update current sort if needed
+                val currentSortField = _state.value.receiptSortOrder.field
+                if (!currentFields.contains(currentSortField)) {
+                    val newSortField = currentFields.first()
+                    val newSortOrder = ReceiptSortOrder(
+                        field = newSortField,
+                        isAscending = if (newSortField == SortField.DATE) false else true
+                    )
+                    onEvent(ReceiptsEvent.Order(newSortOrder))
+                }
             }
         }
     }
@@ -217,6 +249,32 @@ class ReceiptViewModel @Inject constructor(
         viewModelScope.launch {
             val total = repository.getMonthlyTotal(userId)
             _monthlyTotal.value = total
+        }
+    }
+
+    private fun loadSettings(userId: UUID) {
+        viewModelScope.launch {
+            try {
+                Log.d("ReceiptViewModel", "Loading settings for user: $userId")
+                val settings = settingsRepository.getSettingsByUserId(userId)
+                if (settings != null) {
+                    Log.d("ReceiptViewModel", "Found settings: ${settings.enabledSortFields}")
+                    val sortFields = SettingsRepositoryImpl.parseEnabledSortFields(settings.enabledSortFields)
+                    _enabledSortFields.value = sortFields
+                    Log.d("ReceiptViewModel", "Loaded sort fields: $sortFields")
+                } else {
+                    Log.d("ReceiptViewModel", "No settings found, creating defaults")
+                    val defaultSettings = Settings(
+                        userId = userId,
+                        enabledSortFields = Json.encodeToString(SortField.entries.map { it.name })
+                    )
+                    settingsRepository.insertSettings(defaultSettings)
+                    _enabledSortFields.value = SortField.entries.toSet()
+                }
+            } catch (e: Exception) {
+                Log.e("ReceiptViewModel", "Error loading settings", e)
+                _enabledSortFields.value = SortField.entries.toSet()
+            }
         }
     }
 }
