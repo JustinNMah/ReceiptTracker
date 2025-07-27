@@ -57,6 +57,8 @@ fun ReceiptListScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var searchQuery by remember { mutableStateOf("") }
     val userId = userViewModel.state.value.user?.id
+    val categoryCount by receiptViewModel.categoryCount
+
 
     LaunchedEffect(userId) {
         snapshotFlow { searchQuery }
@@ -193,11 +195,22 @@ fun ReceiptListScreen(
 
                 Text(
                     text = "Total Spent This Month: $${String.format("%.2f", receiptViewModel.monthlyTotal.value)}",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    textAlign = TextAlign.Center
                 )
+
+                Text(
+                    text = "You've spent across $categoryCount categor${if (categoryCount == 1) "y" else "ies"}",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    textAlign = TextAlign.Center
+                )
+
 
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
