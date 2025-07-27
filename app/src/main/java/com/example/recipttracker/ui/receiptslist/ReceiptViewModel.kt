@@ -33,6 +33,10 @@ class ReceiptViewModel @Inject constructor(
     private val _monthlyTotal = mutableStateOf(0f)
     val monthlyTotal: State<Float> = _monthlyTotal
 
+    private val _categoryCount = mutableStateOf(0)
+    val categoryCount: State<Int> = _categoryCount
+
+
 
     private var getReceiptsCoroutine: Job? = null
     private var userId: UUID? = null
@@ -111,6 +115,7 @@ class ReceiptViewModel @Inject constructor(
         getReceiptsCoroutine = repository.getReceipts(uid)
             .onEach { receipts ->
                 sortReceipts(receipts, receiptSortOrder)
+                _categoryCount.value = receipts.map { it.category }.distinct().count()
             }
             .launchIn(viewModelScope)
     }
