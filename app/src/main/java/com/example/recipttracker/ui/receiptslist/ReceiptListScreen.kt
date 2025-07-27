@@ -205,7 +205,7 @@ fun ReceiptListScreen(
                 )
 
                 Text(
-                    text = "You've spent across $categoryCount categor${if (categoryCount == 1) "y" else "ies"}",
+                    text = "You have logged receipts across $categoryCount categor${if (categoryCount == 1) "y" else "ies"}",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .fillMaxWidth()
