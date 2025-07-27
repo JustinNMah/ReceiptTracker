@@ -36,6 +36,10 @@ class ReceiptViewModel @Inject constructor(
     private val _categoryCount = mutableStateOf(0)
     val categoryCount: State<Int> = _categoryCount
 
+    private val _mostVisitedStore = mutableStateOf<Pair<String, Int>?>(null)
+    val mostVisitedStore: State<Pair<String, Int>?> = _mostVisitedStore
+
+
 
 
     private var getReceiptsCoroutine: Job? = null
