@@ -39,8 +39,8 @@ class ReceiptViewModel @Inject constructor(
     private val _mostVisitedStore = mutableStateOf<Pair<String, Int>?>(null)
     val mostVisitedStore: State<Pair<String, Int>?> = _mostVisitedStore
 
-
-
+    private val _enabledSortFields = mutableStateOf(SortField.entries.toSet())
+    val enabledSortFields: State<Set<SortField>> = _enabledSortFields
 
     private var getReceiptsCoroutine: Job? = null
     private var userId: UUID? = null
@@ -103,8 +103,31 @@ class ReceiptViewModel @Inject constructor(
                         event.category,
                         event.filePath
                     )
-                    userId?.let { updateReceiptCount(it) } //added the function
+                    userId?.let { updateReceiptCount(it) }
                 }
+            }
+        }
+    }
+
+    fun toggleSortField(sortField: SortField) {
+        val currentFields = _enabledSortFields.value.toMutableSet()
+
+        if (currentFields.size > 1 || !currentFields.contains(sortField)) {
+            if (currentFields.contains(sortField)) {
+                currentFields.remove(sortField)
+            } else {
+                currentFields.add(sortField)
+            }
+            _enabledSortFields.value = currentFields
+
+            val currentSortField = _state.value.receiptSortOrder.field
+            if (!currentFields.contains(currentSortField)) {
+                val newSortField = currentFields.first()
+                val newSortOrder = ReceiptSortOrder(
+                    field = newSortField,
+                    isAscending = if (newSortField == SortField.DATE) false else true
+                )
+                onEvent(ReceiptsEvent.Order(newSortOrder))
             }
         }
     }
@@ -127,8 +150,6 @@ class ReceiptViewModel @Inject constructor(
                     .maxByOrNull { it.value }
 
                 _mostVisitedStore.value = mostVisitedEntry?.let { Pair(it.key, it.value) }
-
-
             }
             .launchIn(viewModelScope)
     }
@@ -188,8 +209,6 @@ class ReceiptViewModel @Inject constructor(
                     .maxByOrNull { it.value }
 
                 _mostVisitedStore.value = mostVisitedEntry?.let { Pair(it.key, it.value) }
-
-
             }
             .launchIn(viewModelScope)
     }
@@ -200,7 +219,6 @@ class ReceiptViewModel @Inject constructor(
             _monthlyTotal.value = total
         }
     }
-
 }
 
 private suspend fun getCloudReceipts(userId: UUID) : List<Receipt> {
