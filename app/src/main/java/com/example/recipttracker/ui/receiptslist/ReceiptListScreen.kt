@@ -58,6 +58,8 @@ fun ReceiptListScreen(
     var searchQuery by remember { mutableStateOf("") }
     val userId = userViewModel.state.value.user?.id
     val categoryCount by receiptViewModel.categoryCount
+    val mostVisitedStore by receiptViewModel.mostVisitedStore
+
 
 
     LaunchedEffect(userId) {
