@@ -162,6 +162,8 @@ class ReceiptViewModel @Inject constructor(
         getReceiptsCoroutine = repository.searchReceipts(userId, query)
             .onEach { receipts ->
                 sortReceipts(receipts, _state.value.receiptSortOrder)
+                _categoryCount.value = receipts.map { it.category }.distinct().count()
+
             }
             .launchIn(viewModelScope)
     }
