@@ -42,6 +42,7 @@ fun ReceiptListScreen(
     onUpload: () -> Unit,
     onLogout: () -> Unit,
     onView: () -> Unit,
+    onSettings: () -> Unit,
     receiptViewModel: ReceiptViewModel,
     userViewModel: UserViewModel,
     modifyReceiptVM: ModifyReceiptVM
@@ -90,6 +91,17 @@ fun ReceiptListScreen(
                     text = "Menu",
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(16.dp)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = {
+                        scope.launch {
+                            onSettings()
+                            drawerState.close()
+                        }
+                    }
                 )
 
                 NavigationDrawerItem(
@@ -186,46 +198,6 @@ fun ReceiptListScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                Text(
-                    text = "Showing $receiptCount receipt(s)",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "Total Spent This Month: $${String.format("%.2f", receiptViewModel.monthlyTotal.value)}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "You have logged receipts across $categoryCount categor${if (categoryCount == 1) "y" else "ies"}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                mostVisitedStore?.let { (store, count) ->
-                    Text(
-                        text = "Most visited store: $store ($count receipts)",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-
-
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
                         .fillMaxWidth()
