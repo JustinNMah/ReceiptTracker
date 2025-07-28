@@ -142,7 +142,7 @@ fun ReceiptListScreen(
                                     placeholder = { Text("Search...") },
                                     modifier = Modifier
                                         .weight(1f)
-                                        .padding(end = 8.dp),
+                                        .padding(end = 16.dp),
                                     textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface)
                                 )
                                 IconButton(
