@@ -193,9 +193,9 @@ class ReceiptViewModel @Inject constructor(
                     compareByDescending { it.parsedDate }
                 }
                 SortField.STORE -> if (receiptSortOrder.isAscending) {
-                    compareBy { it.store }
+                    compareBy { it.store.lowercase() }
                 } else {
-                    compareByDescending { it.store }
+                    compareByDescending { it.store.lowercase() }
                 }
                 SortField.CATEGORY -> if (receiptSortOrder.isAscending) {
                     compareBy { it.category }
@@ -209,9 +209,11 @@ class ReceiptViewModel @Inject constructor(
                 }
             }
         )
-        val groupedReceipts = when(receiptSortOrder.field) {
+        val groupedReceipts = when (receiptSortOrder.field) {
             SortField.DATE -> sortedReceipts.groupBy { it.monthYear }
-            SortField.STORE -> mapOf("" to sortedReceipts)
+            SortField.STORE -> sortedReceipts.groupBy {
+                it.store.trim().takeIf { name -> name.isNotEmpty() }?.first()?.uppercaseChar().toString()
+            }
             SortField.CATEGORY -> sortedReceipts.groupBy { it.category }
             SortField.AMOUNT -> mapOf("" to sortedReceipts)
         }

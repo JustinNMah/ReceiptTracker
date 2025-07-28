@@ -225,7 +225,7 @@ fun ReceiptListScreen(
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(0.dp)
                                 ) {
                                     Text(
                                         option.toString(),
@@ -250,21 +250,23 @@ fun ReceiptListScreen(
 
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     receipts.forEach { (category, items) ->
-                        item {
-                            Column {
-                                Spacer(modifier = Modifier.height(12.dp))
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    thickness = 1.dp,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
-                                Text(
-                                    text = category,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                )
+                        if (category.isNotBlank()) {
+                            item {
+                                Column {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        thickness = 1.dp,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                    Text(
+                                        text = category,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    )
+                                }
                             }
                         }
                         items(items) { receipt ->
